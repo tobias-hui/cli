@@ -1,10 +1,8 @@
 import { defineCommand } from '../../command';
 import { clearCredentials, loadCredentials } from '../../auth/credentials';
-import { getConfigPath } from '../../config/paths';
+import { readConfigFile, writeConfigFile } from '../../config/loader';
 import type { Config } from '../../config/schema';
 import type { GlobalFlags } from '../../types/flags';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { parse as parseYaml, stringify as yamlStringify } from 'yaml';
 
 export default defineCommand({
   name: 'auth logout',
@@ -17,13 +15,8 @@ export default defineCommand({
   ],
   async run(config: Config, flags: GlobalFlags) {
     const creds = await loadCredentials();
-    const configPath = getConfigPath();
-    const hasConfigKey = existsSync(configPath) && (() => {
-      try {
-        const parsed = parseYaml(readFileSync(configPath, 'utf-8'));
-        return parsed?.api_key;
-      } catch { return false; }
-    })();
+    const fileConfig = readConfigFile();
+    const hasConfigKey = !!fileConfig.api_key;
 
     if (config.dryRun) {
       if (creds) console.log('Would remove ~/.minimax/credentials.json');
@@ -40,10 +33,9 @@ export default defineCommand({
 
     if (hasConfigKey) {
       try {
-        const raw = readFileSync(configPath, 'utf-8');
-        const parsed = parseYaml(raw) || {};
-        delete parsed.api_key;
-        writeFileSync(configPath, yamlStringify(parsed), { mode: 0o600 });
+        const updated = fileConfig as Record<string, unknown>;
+        delete updated.api_key;
+        await writeConfigFile(updated);
         process.stderr.write('Cleared api_key from ~/.minimax/config.yaml\n');
       } catch { /* ignore */ }
     }

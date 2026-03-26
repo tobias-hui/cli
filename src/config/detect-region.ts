@@ -1,24 +1,16 @@
 import { REGIONS, type Region } from './schema';
-import { ensureConfigDir, getConfigPath } from './paths';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { parse as parseYaml, stringify as yamlStringify } from 'yaml';
+import { readConfigFile, writeConfigFile } from './loader';
 
 const QUOTA_PATH = '/v1/api/openplatform/coding_plan/remains';
 
 function quotaUrl(region: Region): string {
-  const apiHost = REGIONS[region];
-  // Quota endpoint uses www subdomain
-  const wwwHost = apiHost.replace('://api.', '://www.');
-  return `${wwwHost}${QUOTA_PATH}`;
+  return REGIONS[region].replace('://api.', '://www.') + QUOTA_PATH;
 }
 
 async function probeRegion(region: Region, apiKey: string, timeoutMs: number): Promise<boolean> {
   try {
     const res = await fetch(quotaUrl(region), {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       signal: AbortSignal.timeout(timeoutMs),
     });
     if (!res.ok) return false;
@@ -29,44 +21,20 @@ async function probeRegion(region: Region, apiKey: string, timeoutMs: number): P
   }
 }
 
-/**
- * Probes both region endpoints in parallel to detect which region an API key belongs to.
- * Returns the detected region, or 'global' as fallback.
- */
 export async function detectRegion(apiKey: string): Promise<Region> {
   process.stderr.write('Detecting region...');
-
-  const timeout = 5000;
   const regions = Object.keys(REGIONS) as Region[];
-
   const results = await Promise.all(
-    regions.map(async (r) => ({ region: r, ok: await probeRegion(r, apiKey, timeout) })),
+    regions.map(async (r) => ({ region: r, ok: await probeRegion(r, apiKey, 5000) })),
   );
-
-  const match = results.find((r) => r.ok);
-  const detected: Region = match?.region ?? 'global';
-
+  const detected: Region = results.find((r) => r.ok)?.region ?? 'global';
   process.stderr.write(` ${detected}\n`);
   return detected;
 }
 
-/**
- * Saves the detected region and key fingerprint to ~/.minimax/config.yaml.
- */
 export async function saveDetectedRegion(region: Region, keyFingerprint?: string): Promise<void> {
-  await ensureConfigDir();
-  const configPath = getConfigPath();
-
-  let existing: Record<string, unknown> = {};
-  if (existsSync(configPath)) {
-    try {
-      existing = parseYaml(readFileSync(configPath, 'utf-8')) || {};
-    } catch { /* ignore */ }
-  }
-
+  const existing = readConfigFile() as Record<string, unknown>;
   existing.region = region;
-  if (keyFingerprint) {
-    existing.region_key_fingerprint = keyFingerprint;
-  }
-  writeFileSync(configPath, yamlStringify(existing), { mode: 0o600 });
+  if (keyFingerprint) existing.region_key_fingerprint = keyFingerprint;
+  await writeConfigFile(existing);
 }

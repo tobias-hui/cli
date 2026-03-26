@@ -18,6 +18,7 @@ import visionDescribe from './commands/vision/describe';
 import quotaShow from './commands/quota/show';
 import configShow from './commands/config/show';
 import configSet from './commands/config/set';
+import update from './commands/update';
 
 interface CommandNode {
   command?: Command;
@@ -45,7 +46,7 @@ class CommandRegistry {
     node.command = command;
   }
 
-  resolve(commandPath: string[]): Command {
+  resolve(commandPath: string[]): { command: Command; extra: string[] } {
     let node = this.root;
     const matched: string[] = [];
 
@@ -57,7 +58,7 @@ class CommandRegistry {
     }
 
     if (node.command) {
-      return node.command;
+      return { command: node.command, extra: commandPath.slice(matched.length) };
     }
 
     // If we matched some path but no command, show help for that group
@@ -133,6 +134,7 @@ Resources:
   vision     Image understanding (describe)
   quota      Usage quotas (show)
   config     CLI configuration (show, set)
+  update     Update minimax to a newer version
 
 Global Flags:
   --api-key <key>        API key (overrides all other auth)
@@ -207,4 +209,5 @@ export const registry = new CommandRegistry({
   'quota show':        quotaShow,
   'config show':       configShow,
   'config set':        configSet,
+  'update':            update,
 });

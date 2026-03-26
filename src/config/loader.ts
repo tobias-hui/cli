@@ -1,46 +1,42 @@
-import { readFileSync, existsSync } from 'fs';
-import { parse as parseYaml } from 'yaml';
-import { ConfigSchema, REGIONS, type Config, type ConfigFile, type Region } from './schema';
-import { getConfigPath } from './paths';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { parse as parseYaml, stringify as yamlStringify } from 'yaml';
+import { parseConfigFile, REGIONS, type Config, type ConfigFile, type Region } from './schema';
+import { ensureConfigDir, getConfigPath } from './paths';
 import { detectOutputFormat, type OutputFormat } from '../output/formatter';
 import type { GlobalFlags } from '../types/flags';
 
-export function loadConfigFile(): Partial<ConfigFile> {
+export function readConfigFile(): ConfigFile {
   const path = getConfigPath();
   if (!existsSync(path)) return {};
-
   try {
-    const raw = readFileSync(path, 'utf-8');
-    const parsed = parseYaml(raw);
-    if (!parsed || typeof parsed !== 'object') return {};
-    return ConfigSchema.partial().parse(parsed);
+    return parseConfigFile(parseYaml(readFileSync(path, 'utf-8')));
   } catch {
     return {};
   }
 }
 
+export async function writeConfigFile(data: Record<string, unknown>): Promise<void> {
+  await ensureConfigDir();
+  writeFileSync(getConfigPath(), yamlStringify(data), { mode: 0o600 });
+}
+
 export function loadConfig(flags: GlobalFlags): Config {
-  const file = loadConfigFile();
+  const file = readConfigFile();
 
   const apiKey = flags.apiKey || undefined;
   const envApiKey = process.env.MINIMAX_API_KEY || undefined;
   const fileApiKey = file.api_key;
 
-  const explicitRegion = (flags.region as string)
-    || process.env.MINIMAX_REGION
-    || undefined;
-
+  const explicitRegion = (flags.region as string) || process.env.MINIMAX_REGION || undefined;
   const cachedRegion = file.region;
   const region = (explicitRegion || cachedRegion || 'global') as Region;
 
   // Re-detect if: no explicit region AND (no cached region OR key fingerprint changed)
-  // Precedence must match resolver: flag > config file > env var (OAuth skipped — no stable fingerprint)
   const activeKey = apiKey || fileApiKey || envApiKey;
   const keyFingerprint = activeKey ? activeKey.slice(0, 8) : undefined;
   const needsRegionDetection = !explicitRegion
     && (!cachedRegion || (keyFingerprint !== undefined && keyFingerprint !== file.region_key_fingerprint));
 
-  // Explicit --base-url overrides region-derived URL
   const baseUrl = flags.baseUrl
     || process.env.MINIMAX_BASE_URL
     || file.base_url
@@ -56,12 +52,6 @@ export function loadConfig(flags: GlobalFlags): Config {
     ?? file.timeout
     ?? 300;
 
-  const verbose = flags.verbose || process.env.MINIMAX_VERBOSE === '1';
-  const quiet = flags.quiet || false;
-  const noColor = flags.noColor || process.env.NO_COLOR !== undefined || !process.stdout.isTTY;
-  const yes = flags.yes || false;
-  const dryRun = flags.dryRun || false;
-
   return {
     apiKey,
     envApiKey,
@@ -70,11 +60,11 @@ export function loadConfig(flags: GlobalFlags): Config {
     baseUrl,
     output,
     timeout,
-    verbose,
-    quiet,
-    noColor,
-    yes,
-    dryRun,
+    verbose: flags.verbose || process.env.MINIMAX_VERBOSE === '1',
+    quiet: flags.quiet || false,
+    noColor: flags.noColor || process.env.NO_COLOR !== undefined || !process.stdout.isTTY,
+    yes: flags.yes || false,
+    dryRun: flags.dryRun || false,
     needsRegionDetection,
   };
 }

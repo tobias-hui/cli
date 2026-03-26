@@ -2,10 +2,9 @@ import { parseArgs } from './args';
 import { registry } from './registry';
 import { handleError } from './errors/handler';
 import { loadConfig } from './config/loader';
-import { resolveCredential } from './auth/resolver';
-import { formatOutput } from './output/formatter';
 import { detectRegion, saveDetectedRegion } from './config/detect-region';
 import { REGIONS } from './config/schema';
+import { checkForUpdate, getPendingUpdateNotification } from './update/checker';
 
 const CLI_VERSION = process.env.CLI_VERSION ?? '0.1.0';
 
@@ -24,7 +23,9 @@ async function main() {
     process.exit(0);
   }
 
-  const command = registry.resolve(commandPath);
+  const { command, extra } = registry.resolve(commandPath);
+  if (extra.length > 0) (flags as Record<string, unknown>)._positional = extra;
+
   const config = loadConfig(flags);
 
   // Auto-detect region when no explicit region is set and the API key has changed
@@ -39,7 +40,18 @@ async function main() {
     }
   }
 
+  // Fire-and-forget update check (non-blocking)
+  const updateCheckPromise = checkForUpdate(CLI_VERSION).catch(() => {});
+
   await command.execute(config, flags);
+
+  // After command finishes, flush the update check and notify if needed
+  await updateCheckPromise;
+  const newVersion = getPendingUpdateNotification();
+  if (newVersion && !config.quiet) {
+    process.stderr.write(`\n  Update available: v${CLI_VERSION} → ${newVersion}\n`);
+    process.stderr.write(`  Run 'minimax update' to upgrade.\n\n`);
+  }
 }
 
 main().catch(handleError);

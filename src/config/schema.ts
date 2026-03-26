@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 export const REGIONS = {
   global: 'https://api.minimax.io',
   cn: 'https://api.minimaxi.com',
@@ -7,16 +5,32 @@ export const REGIONS = {
 
 export type Region = keyof typeof REGIONS;
 
-export const ConfigSchema = z.object({
-  api_key: z.string().optional(),
-  region: z.enum(['global', 'cn']).default('global'),
-  region_key_fingerprint: z.string().optional(),
-  base_url: z.string().url().optional(),
-  output: z.enum(['text', 'json', 'yaml']).default('text'),
-  timeout: z.number().positive().default(300),
-});
+export interface ConfigFile {
+  api_key?: string;
+  region?: Region;
+  region_key_fingerprint?: string;
+  base_url?: string;
+  output?: 'text' | 'json' | 'yaml';
+  timeout?: number;
+}
 
-export type ConfigFile = z.infer<typeof ConfigSchema>;
+const VALID_REGIONS = new Set<string>(['global', 'cn']);
+const VALID_OUTPUTS = new Set<string>(['text', 'json', 'yaml']);
+
+export function parseConfigFile(raw: unknown): ConfigFile {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const obj = raw as Record<string, unknown>;
+  const out: ConfigFile = {};
+
+  if (typeof obj.api_key === 'string') out.api_key = obj.api_key;
+  if (typeof obj.region === 'string' && VALID_REGIONS.has(obj.region)) out.region = obj.region as Region;
+  if (typeof obj.region_key_fingerprint === 'string') out.region_key_fingerprint = obj.region_key_fingerprint;
+  if (typeof obj.base_url === 'string' && obj.base_url.startsWith('http')) out.base_url = obj.base_url;
+  if (typeof obj.output === 'string' && VALID_OUTPUTS.has(obj.output)) out.output = obj.output as ConfigFile['output'];
+  if (typeof obj.timeout === 'number' && obj.timeout > 0) out.timeout = obj.timeout;
+
+  return out;
+}
 
 export interface Config {
   apiKey?: string;

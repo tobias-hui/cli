@@ -1,5 +1,5 @@
 import { defineCommand } from '../../command';
-import { loadConfigFile } from '../../config/loader';
+import { readConfigFile as loadConfigFile } from '../../config/loader';
 import { getConfigPath } from '../../config/paths';
 import { formatOutput, detectOutputFormat } from '../../output/formatter';
 import type { Config } from '../../config/schema';

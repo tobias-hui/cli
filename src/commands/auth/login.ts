@@ -6,13 +6,12 @@ import { startBrowserFlow, startDeviceCodeFlow } from '../../auth/oauth';
 import { requestJson } from '../../client/http';
 import { quotaEndpoint } from '../../client/endpoints';
 import { formatOutput } from '../../output/formatter';
-import { ensureConfigDir, getConfigPath } from '../../config/paths';
+import { getConfigPath } from '../../config/paths';
+import { readConfigFile, writeConfigFile } from '../../config/loader';
 import type { Config } from '../../config/schema';
 import type { GlobalFlags } from '../../types/flags';
 import type { CredentialFile } from '../../auth/types';
 import type { QuotaResponse } from '../../types/api';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { parse as parseYaml, stringify as yamlStringify } from 'yaml';
 
 export default defineCommand({
   name: 'auth login',
@@ -60,17 +59,10 @@ export default defineCommand({
         }
 
         // Store key in config.yaml
-        await ensureConfigDir();
-        const configPath = getConfigPath();
-        let existing: Record<string, unknown> = {};
-        if (existsSync(configPath)) {
-          try {
-            existing = parseYaml(readFileSync(configPath, 'utf-8')) || {};
-          } catch { /* ignore */ }
-        }
+        const existing = readConfigFile() as Record<string, unknown>;
         existing.api_key = key;
-        writeFileSync(configPath, yamlStringify(existing), { mode: 0o600 });
-        process.stderr.write(`API key saved to ${configPath}\n`);
+        await writeConfigFile(existing);
+        process.stderr.write(`API key saved to ${getConfigPath()}\n`);
       } else {
         console.log('Would validate and save API key.');
       }
