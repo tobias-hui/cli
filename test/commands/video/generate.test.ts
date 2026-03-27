@@ -33,6 +33,6 @@ describe('video generate command', () => {
         nonInteractive: false,
         async: false,
       }),
-    ).rejects.toThrow('--prompt is required');
+    ).rejects.toThrow('Missing required argument: --prompt');
   });
 });
