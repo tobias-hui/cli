@@ -10,16 +10,8 @@
 
 ## 安装
 
-**二进制安装（推荐）— macOS / Linux / Windows：**
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/MiniMax-AI-Dev/cli/main/install.sh | sh
-```
-
-**npm / bun：**
-
-```bash
-npm install -g minimax-cli
 ```
 
 ---

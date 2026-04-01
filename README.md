@@ -10,16 +10,8 @@ Supports **Global** (`api.minimax.io`) and **CN** (`api.minimaxi.com`) with auto
 
 ## Install
 
-**Binary (recommended) — macOS / Linux / Windows:**
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/MiniMax-AI-Dev/cli/main/install.sh | sh
-```
-
-**npm / bun:**
-
-```bash
-npm install -g minimax-cli
 ```
 
 ---
