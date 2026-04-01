@@ -25,8 +25,10 @@ async function main() {
     process.exit(0);
   }
 
-  // No command: show quota if logged in, else guide to login
+  // No command: help + quota (if logged in) or login guide
   if (commandPath.length === 0) {
+    registry.printHelp([], process.stderr);
+
     const { command: quotaCmd } = registry.resolve(['quota', 'show']);
     const flags = parseFlags(argv, [...GLOBAL_OPTIONS, ...(quotaCmd.options ?? [])]);
     const config = loadConfig(flags);
@@ -37,7 +39,7 @@ async function main() {
     if (hasKey || hasOAuth) {
       await quotaCmd.execute(config, flags);
     } else {
-      process.stderr.write('\n  Not logged in.\n\n');
+      process.stderr.write('  Not logged in.\n');
       process.stderr.write('  minimax auth login --api-key sk-xxxxx\n\n');
     }
     process.exit(0);
