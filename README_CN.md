@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://filecdn.minimax.chat/public/6335add6-5bff-42c8-89bf-0a505aa61c5a.png" alt="MiniMax" width="320" />
+  <img src="https://file.cdn.minimax.io/public/MMX.png" alt="MiniMax" width="320" />
 </p>
 
 <p align="center">
