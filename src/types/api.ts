@@ -180,7 +180,12 @@ export interface VideoRequest {
   model: string;
   prompt: string;
   first_frame_image?: string;
+  last_frame_image?: string;
   callback_url?: string;
+  subject_reference?: Array<{
+    type: string;
+    image: string[];
+  }>;
 }
 
 export interface VideoResponse {
