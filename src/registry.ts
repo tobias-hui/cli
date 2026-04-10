@@ -23,6 +23,7 @@ import configShow from './commands/config/show';
 import configSet from './commands/config/set';
 import configExportSchema from './commands/config/export-schema';
 import update from './commands/update';
+import help from './commands/help';
 
 export type { Command, OptionDef } from './command';
 
@@ -282,4 +283,5 @@ export const registry = new CommandRegistry({
   'config set':           configSet,
   'config export-schema': configExportSchema,
   'update':               update,
+  'help':                 help,
 });
