@@ -21,8 +21,8 @@ import { promptText, failIfMissing } from '../../utils/prompt';
 
 export default defineCommand({
   name: 'video generate',
-  description: 'Generate a video (T2V: Hailuo-2.3 / 2.3-Fast / Hailuo-02 | I2V: + I2V-01 / I2V-01-Director / I2V-01-live | S2V: S2V-01)',
-  apiDocs: 'https://platform.minimax.io/docs/api-reference/video-generation',
+  description: 'Generate a video (T2V: Hailuo-2.3 / 2.3-Fast / Hailuo-02 | I2V: I2V-01 / I2V-01-Director / I2V-01-live | S2V: S2V-01)',
+  apiDocs: '/docs/api-reference/video-generation',
   usage: 'mmx video generate --prompt <text> [flags]',
   options: [
     { flag: '--model <model>', description: 'Model ID (default: MiniMax-Hailuo-2.3). Auto-switched to Hailuo-02 with --last-frame, or S2V-01 with --subject-image.' },
@@ -60,6 +60,15 @@ export default defineCommand({
       } else {
         failIfMissing('prompt', 'mmx video generate --prompt <text>');
       }
+    }
+
+    // Validate mutually exclusive mode flags
+    if (flags.lastFrame && flags.subjectImage) {
+      throw new CLIError(
+        '--last-frame and --subject-image cannot be used together (SEF and S2V are different modes).',
+        ExitCode.USAGE,
+        'mmx video generate --prompt <text> --first-frame <path> --last-frame <path>',
+      );
     }
 
     // Determine model: explicit --model overrides auto-switch
