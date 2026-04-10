@@ -60,7 +60,7 @@ export default defineCommand({
       lyrics = readTextFromPathOrStdin(flags.lyricsFile as string);
     }
 
-    if (isInstrumental && lyrics) {
+    if (isInstrumental && (lyrics || flags.lyricsFile)) {
       throw new CLIError(
         'Cannot use --instrumental with --lyrics or --lyrics-file.',
         ExitCode.USAGE,
