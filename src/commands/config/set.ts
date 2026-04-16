@@ -85,6 +85,12 @@ export default defineCommand({
 
     const existing = readConfigFile() as Record<string, unknown>;
     existing[resolvedKey] = resolvedKey === 'timeout' ? Number(value) : value;
+
+    // When API key changes, clear cached region so it gets re-detected
+    if (resolvedKey === 'api_key') {
+      delete existing.region;
+    }
+
     await writeConfigFile(existing);
 
     if (!config.quiet) {
