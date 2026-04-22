@@ -163,6 +163,19 @@ async function loginPiapi(config: Config, flags: GlobalFlags): Promise<void> {
     return;
   }
 
+  process.stderr.write('Testing PiAPI key... ');
+  try {
+    await validatePiapiKey(key, config.providers?.piapi?.baseUrl);
+    process.stderr.write('Valid\n');
+  } catch (e) {
+    process.stderr.write('Failed\n');
+    throw new CLIError(
+      `PiAPI key validation failed: ${(e as Error).message}`,
+      ExitCode.AUTH,
+      'Check that your key is correct at https://piapi.ai/workspace/key',
+    );
+  }
+
   const existing = readConfigFile() as Record<string, unknown>;
   const providers = (existing.providers as Record<string, unknown> | undefined) ?? {};
   const piapi = (providers.piapi as Record<string, unknown> | undefined) ?? {};
@@ -171,4 +184,18 @@ async function loginPiapi(config: Config, flags: GlobalFlags): Promise<void> {
   existing.providers = providers;
   await writeConfigFile(existing);
   process.stderr.write(`PiAPI key saved to ${getConfigPath()}\n`);
+}
+
+/**
+ * Validate a PiAPI key by hitting the task endpoint with a dummy ID.
+ * 401 → invalid key. Any other response (400/404/200) means auth passed.
+ */
+async function validatePiapiKey(key: string, baseUrl?: string): Promise<void> {
+  const url = `${baseUrl ?? 'https://api.piapi.ai'}/api/v1/task/00000000-0000-0000-0000-000000000000`;
+  const res = await fetch(url, {
+    headers: { 'X-API-Key': key },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (res.status === 401) throw new Error('unauthorized (HTTP 401)');
+  // 400/404/200 all indicate auth passed; only 401 means bad key.
 }
