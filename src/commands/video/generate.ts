@@ -23,7 +23,7 @@ export default defineCommand({
   name: 'video generate',
   description: 'Generate a video\n  T2V:  Hailuo-2.3\n  I2V:  Hailuo-2.3 (default) / Hailuo-2.3-Fast (fast mode, requires --first-frame)\n  SEF:  Hailuo-02 (requires --first-frame and --last-frame)\n  S2V:  S2V-01 (requires --subject-image)',
   apiDocs: '/docs/api-reference/video-generation',
-  usage: 'mmx video generate --prompt <text> [flags]',
+  usage: 'pimx video generate --prompt <text> [flags]',
   options: [
     { flag: '--model <model>', description: 'Model ID. T2V: MiniMax-Hailuo-2.3; I2V: MiniMax-Hailuo-2.3 (default) or MiniMax-Hailuo-2.3-Fast (fast, requires --first-frame). Auto-switched to Hailuo-02 with --last-frame, or S2V-01 with --subject-image.' },
     { flag: '--prompt <text>', description: 'Video description', required: true },
@@ -37,14 +37,14 @@ export default defineCommand({
     { flag: '--poll-interval <seconds>', description: 'Polling interval when waiting (default: 5)', type: 'number' },
   ],
   examples: [
-    'mmx video generate --prompt "A man reads a book. Static shot."',
-    'mmx video generate --prompt "Ocean waves at sunset." --download sunset.mp4',
-    'mmx video generate --prompt "A robot painting." --async --quiet',
-    'mmx video generate --prompt "A robot painting." --no-wait --quiet',
+    'pimx video generate --prompt "A man reads a book. Static shot."',
+    'pimx video generate --prompt "Ocean waves at sunset." --download sunset.mp4',
+    'pimx video generate --prompt "A robot painting." --async --quiet',
+    'pimx video generate --prompt "A robot painting." --no-wait --quiet',
     '# SEF: first + last frame interpolation (uses Hailuo-02 model)',
-    'mmx video generate --prompt "Walk forward" --first-frame start.jpg --last-frame end.jpg',
+    'pimx video generate --prompt "Walk forward" --first-frame start.jpg --last-frame end.jpg',
     '# Subject reference: character consistency (uses S2V-01 model)',
-    'mmx video generate --prompt "A detective walking" --subject-image character.jpg',
+    'pimx video generate --prompt "A detective walking" --subject-image character.jpg',
   ],
   async run(config: Config, flags: GlobalFlags) {
     let prompt = flags.prompt as string | undefined;
@@ -58,7 +58,7 @@ export default defineCommand({
         }
         prompt = hint;
       } else {
-        failIfMissing('prompt', 'mmx video generate --prompt <text>');
+        failIfMissing('prompt', 'pimx video generate --prompt <text>');
       }
     }
 
@@ -67,7 +67,7 @@ export default defineCommand({
       throw new CLIError(
         '--last-frame and --subject-image cannot be used together (SEF and S2V are different modes).',
         ExitCode.USAGE,
-        'mmx video generate --prompt <text> --first-frame <path> --last-frame <path>',
+        'pimx video generate --prompt <text> --first-frame <path> --last-frame <path>',
       );
     }
 
@@ -77,7 +77,7 @@ export default defineCommand({
       throw new CLIError(
         'MiniMax-Hailuo-2.3-Fast only supports I2V (image-to-video). Use --first-frame to provide an input image.',
         ExitCode.USAGE,
-        'mmx video generate --prompt <text> --model MiniMax-Hailuo-2.3-Fast --first-frame <image>',
+        'pimx video generate --prompt <text> --model MiniMax-Hailuo-2.3-Fast --first-frame <image>',
       );
     }
 
@@ -118,7 +118,7 @@ export default defineCommand({
         throw new CLIError(
           '--last-frame requires --first-frame (SEF mode).',
           ExitCode.USAGE,
-          'mmx video generate --prompt <text> --first-frame <path> --last-frame <path>',
+          'pimx video generate --prompt <text> --first-frame <path> --last-frame <path>',
         );
       }
       const framePath = flags.lastFrame as string;
@@ -231,7 +231,7 @@ export default defineCommand({
     // Default: auto-download to temp location and output local file path
     const os = await import('os');
     const { join } = await import('path');
-    const destDir = join(os.tmpdir(), 'mmx-video');
+    const destDir = join(os.tmpdir(), 'pimx-video');
     const { existsSync, mkdirSync } = await import('fs');
     if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
     const destPath = join(destDir, `${taskId}.mp4`);

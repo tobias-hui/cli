@@ -15,7 +15,7 @@ export default defineCommand({
   name: 'music generate',
   description: 'Generate a song (music-2.6 / music-2.6-free / music-2.5+ / music-2.5)',
   apiDocs: '/docs/api-reference/music-generation',
-  usage: 'mmx music generate --prompt <text> (--lyrics <text> | --instrumental | --lyrics-optimizer) [--out <path>] [flags]',
+  usage: 'pimx music generate --prompt <text> (--lyrics <text> | --instrumental | --lyrics-optimizer) [--out <path>] [flags]',
   options: [
     { flag: '--prompt <text>', description: 'Music style description (e.g. "cinematic orchestral, building tension"). Max 2000 chars when combined with structured flags.' },
     { flag: '--lyrics <text>', description: 'Song lyrics with structure tags (newline separated). Supported: [Intro], [Verse], [Pre Chorus], [Chorus], [Interlude], [Bridge], [Outro], [Post Chorus], [Transition], [Break], [Hook], [Build Up], [Inst], [Solo]. Tags must be clean — no descriptions inside brackets (they will be sung). Max 3500 chars.' },
@@ -44,18 +44,18 @@ export default defineCommand({
     { flag: '--out <path>', description: 'Save audio to file (uses hex decoding)' },
   ],
   examples: [
-    'mmx music generate --prompt "Upbeat pop" --lyrics "La la la..." --out summer.mp3',
-    'mmx music generate --prompt "Indie folk, melancholic" --lyrics-file song.txt --out my_song.mp3',
+    'pimx music generate --prompt "Upbeat pop" --lyrics "La la la..." --out summer.mp3',
+    'pimx music generate --prompt "Indie folk, melancholic" --lyrics-file song.txt --out my_song.mp3',
     '# Auto-generate lyrics from prompt:',
-    'mmx music generate --prompt "Upbeat pop about summer" --lyrics-optimizer --out summer.mp3',
+    'pimx music generate --prompt "Upbeat pop about summer" --lyrics-optimizer --out summer.mp3',
     '# Instrumental:',
-    'mmx music generate --prompt "Cinematic orchestral, building tension" --instrumental --out bgm.mp3',
+    'pimx music generate --prompt "Cinematic orchestral, building tension" --instrumental --out bgm.mp3',
     '# URL output (24h expiry — download promptly):',
-    'mmx music generate --prompt "Upbeat pop" --lyrics "La la la..." --output-format url',
+    'pimx music generate --prompt "Upbeat pop" --lyrics "La la la..." --output-format url',
     '# Instrumental with music-2.5+:',
-    'mmx music generate --prompt "Cinematic orchestral" --model "music-2.5+" --instrumental --out bgm.mp3',
+    'pimx music generate --prompt "Cinematic orchestral" --model "music-2.5+" --instrumental --out bgm.mp3',
     '# Detailed prompt with vocal characteristics:',
-    'mmx music generate --prompt "Warm morning folk" --vocals "male and female duet, harmonies in chorus" --instruments "acoustic guitar, piano" --bpm 95 --lyrics-file song.txt --out duet.mp3',
+    'pimx music generate --prompt "Warm morning folk" --vocals "male and female duet, harmonies in chorus" --instruments "acoustic guitar, piano" --bpm 95 --lyrics-file song.txt --out duet.mp3',
   ],
   async run(config: Config, flags: GlobalFlags) {
     let prompt = flags.prompt as string | undefined;
@@ -71,7 +71,7 @@ export default defineCommand({
       throw new CLIError(
         'Cannot use --instrumental with --lyrics or --lyrics-file.',
         ExitCode.USAGE,
-        'mmx music generate --prompt <style> --instrumental',
+        'pimx music generate --prompt <style> --instrumental',
       );
     }
 
@@ -79,7 +79,7 @@ export default defineCommand({
       throw new CLIError(
         'Cannot use --lyrics-optimizer with --lyrics, --lyrics-file, or --instrumental.',
         ExitCode.USAGE,
-        'mmx music generate --prompt <text> --lyrics-optimizer',
+        'pimx music generate --prompt <text> --lyrics-optimizer',
       );
     }
 
@@ -87,7 +87,7 @@ export default defineCommand({
       throw new CLIError(
         'At least one of --prompt or --lyrics is required.',
         ExitCode.USAGE,
-        'mmx music generate --prompt <text> --lyrics <text>',
+        'pimx music generate --prompt <text> --lyrics <text>',
       );
     }
 
@@ -95,7 +95,7 @@ export default defineCommand({
       throw new CLIError(
         'Lyrics are required. Add --lyrics or --lyrics-file, or use --instrumental for pure music, or --lyrics-optimizer to auto-generate.',
         ExitCode.USAGE,
-        'mmx music generate --prompt <text> --lyrics <text>',
+        'pimx music generate --prompt <text> --lyrics <text>',
       );
     }
 
@@ -130,7 +130,7 @@ export default defineCommand({
       throw new CLIError(
         `Invalid model "${model}". Valid models: ${VALID_MODELS.join(', ')}`,
         ExitCode.USAGE,
-        'mmx music generate --model music-2.6',
+        'pimx music generate --model music-2.6',
       );
     }
     const outFormat = (flags.outputFormat as string) || 'hex';
@@ -138,14 +138,14 @@ export default defineCommand({
       throw new CLIError(
         '--output-format must be "hex" or "url".',
         ExitCode.USAGE,
-        'mmx music generate --output-format url',
+        'pimx music generate --output-format url',
       );
     }
     if (flags.stream && outFormat === 'url') {
       throw new CLIError(
         '--stream and --output-format url cannot be used together. Streaming requires hex format.',
         ExitCode.USAGE,
-        'mmx music generate --output-format url',
+        'pimx music generate --output-format url',
       );
     }
     const body: MusicRequest = {

@@ -22,7 +22,7 @@ export async function request(config: Config, opts: RequestOpts): Promise<Respon
 
   const version = process.env.CLI_VERSION ?? '1.0.4';
   const headers: Record<string, string> = {
-    'User-Agent': `mmx-cli/${version}`,
+    'User-Agent': `pimx-cli/${version}`,
     ...opts.headers,
   };
 

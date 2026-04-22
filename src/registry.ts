@@ -80,7 +80,7 @@ class CommandRegistry {
       return { command: node.command, extra: commandPath.slice(matched.length) };
     }
 
-    // Single child: auto-forward (e.g. `mmx quota` → `mmx quota show`)
+    // Single child: auto-forward (e.g. `pimx quota` → `pimx quota show`)
     if (matched.length > 0 && node.children.size === 1) {
       const [, child] = node.children.entries().next().value as [string, CommandNode];
       if (child.command) {
@@ -98,16 +98,16 @@ class CommandRegistry {
         })
         .join('\n');
       throw new CLIError(
-        `Unknown command: mmx ${commandPath.join(' ')}\n\nAvailable commands:\n${subcommands}`,
+        `Unknown command: pimx ${commandPath.join(' ')}\n\nAvailable commands:\n${subcommands}`,
         ExitCode.USAGE,
-        `mmx ${matched.join(' ')} --help`,
+        `pimx ${matched.join(' ')} --help`,
       );
     }
 
     throw new CLIError(
-      `Unknown command: mmx ${commandPath.join(' ')}`,
+      `Unknown command: pimx ${commandPath.join(' ')}`,
       ExitCode.USAGE,
-      'mmx --help',
+      'pimx --help',
     );
   }
 
@@ -142,9 +142,9 @@ class CommandRegistry {
       return;
     }
 
-    // Group help (e.g. `mmx auth --help`)
+    // Group help (e.g. `pimx auth --help`)
     const prefix = commandPath.join(' ');
-    out.write(`\n${this.bold('Usage:', out)} mmx ${prefix} <command> [flags]\n\n`);
+    out.write(`\n${this.bold('Usage:', out)} pimx ${prefix} <command> [flags]\n\n`);
     out.write(`${this.bold('Commands:', out)}\n`);
     this.printChildren(node, prefix, out);
     out.write('\n');
@@ -184,7 +184,7 @@ class CommandRegistry {
     const d = (s: string) => this.dim(s, out);
 
     out.write(`
-${b('Usage:')} mmx <resource> <command> [flags]
+${b('Usage:')} pimx <resource> <command> [flags]
 
 ${b('Resources:')}
   ${a('auth')}       ${d('Authentication (login, status, refresh, logout)')}
@@ -197,7 +197,7 @@ ${b('Resources:')}
   ${a('vision')}     ${d('Image understanding (describe)')}
   ${a('quota')}      ${d('Usage quotas (show)')}
   ${a('config')}     ${d('CLI configuration (show, set, export-schema)')}
-  ${a('update')}     ${d('Update mmx to a newer version')}
+  ${a('update')}     ${d('Update pimx to a newer version')}
 
 ${b('Global Flags:')}
   ${a('--api-key <key>')}        ${d('API key (overrides all other auth)')}
@@ -215,7 +215,7 @@ ${b('Global Flags:')}
 
 ${b('Getting Help:')}
   ${d('Add --help after any command to see its full list of options, defaults,')}
-  ${d('and usage examples. For example:')} mmx text chat --help
+  ${d('and usage examples. For example:')} pimx text chat --help
 `);
   }
 
@@ -243,7 +243,7 @@ ${b('Getting Help:')}
       out.write(`\n${b('API Reference:')} ${d(DOCS_HOSTS[region] + cmd.apiDocs)}\n`);
     }
     out.write(`\n${d('Global flags (--api-key, --output, --quiet, etc.) are always available.')}\n`);
-    out.write(`${d("Run")} mmx --help ${d('for the full list.')}\n`);
+    out.write(`${d("Run")} pimx --help ${d('for the full list.')}\n`);
   }
 
   private printChildren(node: CommandNode, prefix: string, out: NodeJS.WriteStream): void {

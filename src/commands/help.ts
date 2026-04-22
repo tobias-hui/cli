@@ -10,20 +10,20 @@ interface ApiRef {
 }
 
 const API_REFS: ApiRef[] = [
-  { command: 'mmx text chat',            title: 'Text Generation (Chat Completion)',    path: '/docs/api-reference/text-post' },
-  { command: 'mmx speech synthesize',    title: 'Speech T2A (Text-to-Audio)',           path: '/docs/api-reference/speech-t2a-http' },
-  { command: 'mmx image generate',       title: 'Image Generation (T2I / I2I)',         path: '/docs/api-reference/image-generation-t2i' },
-  { command: 'mmx video generate',       title: 'Video Generation (T2V / I2V / S2V)',   path: '/docs/api-reference/video-generation' },
-  { command: 'mmx music generate',       title: 'Music Generation',                     path: '/docs/api-reference/music-generation' },
-  { command: 'mmx music cover',          title: 'Music Cover (via Music Generation)',   path: '/docs/api-reference/music-generation' },
-  { command: 'mmx search query',         title: 'Web Search',                           path: '/docs/api-reference/web-search' },
-  { command: 'mmx vision describe',      title: 'Vision (Image Understanding)',         path: '/docs/api-reference/vision' },
+  { command: 'pimx text chat',            title: 'Text Generation (Chat Completion)',    path: '/docs/api-reference/text-post' },
+  { command: 'pimx speech synthesize',    title: 'Speech T2A (Text-to-Audio)',           path: '/docs/api-reference/speech-t2a-http' },
+  { command: 'pimx image generate',       title: 'Image Generation (T2I / I2I)',         path: '/docs/api-reference/image-generation-t2i' },
+  { command: 'pimx video generate',       title: 'Video Generation (T2V / I2V / S2V)',   path: '/docs/api-reference/video-generation' },
+  { command: 'pimx music generate',       title: 'Music Generation',                     path: '/docs/api-reference/music-generation' },
+  { command: 'pimx music cover',          title: 'Music Cover (via Music Generation)',   path: '/docs/api-reference/music-generation' },
+  { command: 'pimx search query',         title: 'Web Search',                           path: '/docs/api-reference/web-search' },
+  { command: 'pimx vision describe',      title: 'Vision (Image Understanding)',         path: '/docs/api-reference/vision' },
 ];
 
 export default defineCommand({
   name: 'help',
   description: 'Show MiniMax API documentation links',
-  usage: 'mmx help',
+  usage: 'pimx help',
   async run(config: Config, _flags: GlobalFlags) {
     const host = DOCS_HOSTS[config.region] || DOCS_HOSTS.global;
     process.stdout.write(`

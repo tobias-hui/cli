@@ -9,7 +9,7 @@ describe('auth status command', () => {
   it('shows not authenticated when no credentials', async () => {
     const config = {
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       verbose: false,
@@ -38,7 +38,8 @@ describe('auth status command', () => {
       });
 
       const parsed = JSON.parse(output);
-      expect(parsed.authenticated).toBe(false);
+      expect(parsed.providers.minimax.configured).toBe(false);
+      expect(parsed.providers.piapi.configured).toBe(false);
     } finally {
       console.log = originalLog;
     }

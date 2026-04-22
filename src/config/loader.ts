@@ -1,5 +1,9 @@
 import { readFileSync, writeFileSync, renameSync, existsSync } from 'fs';
-import { parseConfigFile, REGIONS, type Config, type ConfigFile, type Region } from './schema';
+import {
+  parseConfigFile, REGIONS, PIAPI_BASE_URL,
+  getMinimaxKey, getMinimaxRegion, getPiapiKey,
+  type Config, type ConfigFile, type Region,
+} from './schema';
 import { ensureConfigDir, getConfigPath } from './paths';
 import { detectOutputFormat, type OutputFormat } from '../output/formatter';
 import type { GlobalFlags } from '../types/flags';
@@ -12,7 +16,7 @@ export function readConfigFile(): ConfigFile {
   } catch (err) {
     const e = err as Error;
     if (e instanceof SyntaxError || e.message.includes('JSON')) {
-      process.stderr.write(`Warning: config file is corrupted. Run 'mmx config set' to reset.\n`);
+      process.stderr.write(`Warning: config file is corrupted. Run 'pimx config set' to reset.\n`);
     }
     return {};
   }
@@ -30,19 +34,23 @@ export function loadConfig(flags: GlobalFlags): Config {
   const file = readConfigFile();
 
   const apiKey = flags.apiKey || undefined;
-  const fileApiKey = file.api_key;
+  const fileMinimaxKey = getMinimaxKey(file);
+  const fileMinimaxRegion = getMinimaxRegion(file);
+  const fileMinimaxBaseUrl = file.providers?.minimax?.base_url ?? file.base_url;
+  const filePiapiKey = getPiapiKey(file);
+  const filePiapiBaseUrl = file.providers?.piapi?.base_url;
 
   const explicitRegion = (flags.region as string) || process.env.MINIMAX_REGION || undefined;
-  const cachedRegion = file.region;
+  const cachedRegion = fileMinimaxRegion;
   const region = (explicitRegion || cachedRegion || 'global') as Region;
 
-  const activeKey = apiKey || fileApiKey;
+  const activeKey = apiKey || fileMinimaxKey;
   const needsRegionDetection = !explicitRegion
-    && (!cachedRegion || (activeKey !== undefined && activeKey !== file.api_key));
+    && (!cachedRegion || (activeKey !== undefined && activeKey !== fileMinimaxKey));
 
-  const baseUrl = flags.baseUrl
+  const minimaxBaseUrl = flags.baseUrl
     || process.env.MINIMAX_BASE_URL
-    || file.base_url
+    || fileMinimaxBaseUrl
     || REGIONS[region]
     || REGIONS.global;
 
@@ -55,13 +63,16 @@ export function loadConfig(flags: GlobalFlags): Config {
     ? envTimeout : undefined;
   const timeout = flags.timeout ?? validEnvTimeout ?? file.timeout ?? 300;
 
+  const piapiKey = process.env.PIAPI_API_KEY || filePiapiKey;
+  const piapiBaseUrl = process.env.PIAPI_BASE_URL || filePiapiBaseUrl || PIAPI_BASE_URL;
+
   return {
     apiKey,
-    fileApiKey,
-    fileRegion: file.region,
+    fileApiKey: fileMinimaxKey,
+    fileRegion: fileMinimaxRegion,
     configPath: getConfigPath(),
     region,
-    baseUrl,
+    baseUrl: minimaxBaseUrl,
     output,
     timeout,
     defaultTextModel: file.default_text_model,
@@ -76,5 +87,9 @@ export function loadConfig(flags: GlobalFlags): Config {
     nonInteractive: flags.nonInteractive || false,
     async: flags.async || false,
     needsRegionDetection,
+    providers: {
+      minimax: { apiKey: apiKey || fileMinimaxKey, region, baseUrl: minimaxBaseUrl },
+      piapi:   { apiKey: piapiKey, baseUrl: piapiBaseUrl },
+    },
   };
 }

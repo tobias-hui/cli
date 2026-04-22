@@ -11,9 +11,9 @@ import type { CredentialFile } from '../../auth/types';
 export default defineCommand({
   name: 'auth refresh',
   description: 'Manually refresh OAuth token',
-  usage: 'mmx auth refresh',
+  usage: 'pimx auth refresh',
   examples: [
-    'mmx auth refresh',
+    'pimx auth refresh',
   ],
   async run(config: Config, _flags: GlobalFlags) {
     const creds = await loadCredentials();
@@ -22,7 +22,7 @@ export default defineCommand({
       throw new CLIError(
         'Not applicable: not authenticated via OAuth.',
         ExitCode.USAGE,
-        'Run mmx auth login first.',
+        'Run pimx auth login first.',
       );
     }
 

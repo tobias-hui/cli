@@ -1,5 +1,5 @@
 /**
- * Environment detection utilities for mmx-cli.
+ * Environment detection utilities for pimx-cli.
  *
  * Used to determine whether the CLI is running in an interactive terminal
  * (human user) or in a non-interactive environment (CI, agent, pipe, etc.),

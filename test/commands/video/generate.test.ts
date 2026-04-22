@@ -10,7 +10,7 @@ describe('video generate command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'text' as const,
       timeout: 10,
       verbose: false,
@@ -40,7 +40,7 @@ describe('video generate command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       defaultVideoModel: 'MiniMax-Hailuo-2.3-6s-768p',
@@ -81,7 +81,7 @@ describe('video generate command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       defaultVideoModel: 'MiniMax-Hailuo-2.3-6s-768p',
@@ -125,7 +125,7 @@ describe('video generate command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       defaultVideoModel: 'MiniMax-Hailuo-2.3-6s-768p',
@@ -167,7 +167,7 @@ describe('video generate command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       verbose: false,

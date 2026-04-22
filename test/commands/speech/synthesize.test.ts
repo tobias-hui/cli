@@ -10,7 +10,7 @@ describe('speech synthesize command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'text' as const,
       timeout: 10,
       verbose: false,
@@ -40,7 +40,7 @@ describe('speech synthesize command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       verbose: false,
@@ -81,7 +81,7 @@ describe('speech synthesize command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       defaultSpeechModel: 'speech-hd',
@@ -122,7 +122,7 @@ describe('speech synthesize command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       defaultSpeechModel: 'speech-hd',
@@ -164,7 +164,7 @@ describe('speech synthesize command', () => {
     const config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json' as const,
       timeout: 10,
       verbose: false,

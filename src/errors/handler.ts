@@ -29,8 +29,8 @@ export function handleError(err: unknown): never {
         ExitCode.TIMEOUT,
         "Try increasing --timeout (e.g. --timeout 60).\n" +
           "If this happens on every request with a valid API key, you may be hitting the wrong region.\n" +
-          "Run: mmx auth status   — to check your credentials and region.\n" +
-          "Run: mmx config set region global   (or cn) — to override the region.",
+          "Run: pimx auth status   — to check your credentials and region.\n" +
+          "Run: pimx config set region global   (or cn) — to override the region.",
       );
       return handleError(timeout);
     }

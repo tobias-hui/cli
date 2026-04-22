@@ -16,7 +16,7 @@ export default defineCommand({
   name: 'speech synthesize',
   description: 'Synchronous TTS, up to 10k chars (speech-2.8-hd / 2.6 / 02)',
   apiDocs: '/docs/api-reference/speech-t2a-http',
-  usage: 'mmx speech synthesize --text <text> [--out <path>] [flags]',
+  usage: 'pimx speech synthesize --text <text> [--out <path>] [flags]',
   options: [
     { flag: '--model <model>',           description: 'Model ID (default: speech-2.8-hd)' },
     { flag: '--text <text>',             description: 'Text to synthesize' },
@@ -36,11 +36,11 @@ export default defineCommand({
     { flag: '--stream',                  description: 'Stream raw audio to stdout' },
   ],
   examples: [
-    'mmx speech synthesize --text "Hello, world!"',
-    'mmx speech synthesize --text "Hello, world!" --out hello.mp3',
-    'mmx speech synthesize --text "Hello" --subtitles --out hello.mp3',
-    'echo "Breaking news." | mmx speech synthesize --text-file - --out news.mp3',
-    'mmx speech synthesize --text "Stream" --stream | mpv --no-terminal -',
+    'pimx speech synthesize --text "Hello, world!"',
+    'pimx speech synthesize --text "Hello, world!" --out hello.mp3',
+    'pimx speech synthesize --text "Hello" --subtitles --out hello.mp3',
+    'echo "Breaking news." | pimx speech synthesize --text-file - --out news.mp3',
+    'pimx speech synthesize --text "Stream" --stream | mpv --no-terminal -',
   ],
   async run(config: Config, flags: GlobalFlags) {
     let text = (flags.text ?? (flags._positional as string[]|undefined)?.[0]) as string | undefined;
@@ -53,7 +53,7 @@ export default defineCommand({
       throw new CLIError(
         '--text or --text-file is required.',
         ExitCode.USAGE,
-        'mmx speech synthesize --text "Hello" --out hello.mp3',
+        'pimx speech synthesize --text "Hello" --out hello.mp3',
       );
     }
 

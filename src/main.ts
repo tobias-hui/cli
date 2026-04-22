@@ -8,6 +8,7 @@ import { REGIONS, type Region } from './config/schema';
 import { checkForUpdate, getPendingUpdateNotification } from './update/checker';
 import { loadCredentials } from './auth/credentials';
 import { ensureApiKey } from './auth/setup';
+import { findModel } from './providers/registry';
 
 const CLI_VERSION = process.env.CLI_VERSION ?? '1.0.4';
 
@@ -27,6 +28,7 @@ process.stdout.on('error', (e: NodeJS.ErrnoException) => {
 const NO_AUTH_SETUP = [
   ['auth', 'login'],
   ['auth', 'logout'],
+  ['auth', 'status'],
   ['config', 'show'],
   ['config', 'set'],
   ['config', 'export-schema'],
@@ -37,7 +39,7 @@ async function main() {
   const argv = process.argv.slice(2);
 
   if (argv.includes('--version') || argv.includes('-v')) {
-    console.log(`mmx ${CLI_VERSION}`);
+    console.log(`pimx ${CLI_VERSION}`);
     process.exit(0);
   }
 
@@ -65,7 +67,7 @@ async function main() {
       await quotaCmd.execute(config, flags);
     } else {
       process.stderr.write('  Not logged in.\n');
-      process.stderr.write('  mmx auth login --api-key sk-xxxxx\n\n');
+      process.stderr.write('  pimx auth login --api-key sk-xxxxx\n\n');
     }
     process.exit(0);
   }
@@ -80,11 +82,12 @@ async function main() {
   const needsAuthSetup = !NO_AUTH_SETUP.some(
     (cmd) => cmd.every((c, i) => commandPath[i] === c),
   );
-  if (needsAuthSetup) {
+  const usesMinimax = commandUsesMinimax(flags);
+  if (needsAuthSetup && usesMinimax) {
     await ensureApiKey(config);
   }
 
-  if (config.needsRegionDetection) {
+  if (config.needsRegionDetection && usesMinimax) {
     const apiKey = config.apiKey || config.fileApiKey;
     if (apiKey) {
       const detected = await detectRegion(apiKey);
@@ -103,8 +106,20 @@ async function main() {
   const newVersion = getPendingUpdateNotification();
   if (newVersion && !config.quiet) {
     process.stderr.write(`\n  Update available: ${newVersion}\n`);
-    process.stderr.write(`  npm update -g mmx-cli\n\n`);
+    process.stderr.write(`  npm update -g pimx-cli\n\n`);
   }
+}
+
+function commandUsesMinimax(flags: Record<string, unknown>): boolean {
+  const provider = flags.provider;
+  if (provider === 'piapi') return false;
+  if (provider === 'minimax') return true;
+  const model = typeof flags.model === 'string' ? flags.model : undefined;
+  if (model) {
+    const matches = findModel(model);
+    if (matches.length === 1 && matches[0]!.provider === 'piapi') return false;
+  }
+  return true;
 }
 
 main().catch(handleError);

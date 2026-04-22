@@ -40,7 +40,7 @@ export function mapApiError(status: number, body: ApiErrorBody, url?: string): C
     return new CLIError(
       `API key rejected (HTTP ${status}).`,
       ExitCode.AUTH,
-      'Check status: mmx auth status\nRe-authenticate: mmx auth login',
+      'Check status: pimx auth status\nRe-authenticate: pimx auth login',
     );
   }
 
@@ -48,7 +48,7 @@ export function mapApiError(status: number, body: ApiErrorBody, url?: string): C
     return new CLIError(
       `Rate limit or quota exceeded. ${apiMsg}`,
       ExitCode.QUOTA,
-      'Check usage: mmx quota show',
+      'Check usage: pimx quota show',
     );
   }
 
@@ -75,7 +75,7 @@ export function mapApiError(status: number, body: ApiErrorBody, url?: string): C
     return new CLIError(
       `Quota exhausted. ${apiMsg}`,
       ExitCode.QUOTA,
-      `Check usage: mmx quota show${hint}\nUpgrade plan: ${upgradeUrl(url)}`,
+      `Check usage: pimx quota show${hint}\nUpgrade plan: ${upgradeUrl(url)}`,
     );
   }
 
@@ -85,7 +85,7 @@ export function mapApiError(status: number, body: ApiErrorBody, url?: string): C
     return new CLIError(
       `This model is not available on your current Token Plan. ${apiMsg}`,
       ExitCode.QUOTA,
-      `Check usage: mmx quota show${hint}\nUpgrade plan: ${upgradeUrl(url)}`,
+      `Check usage: pimx quota show${hint}\nUpgrade plan: ${upgradeUrl(url)}`,
     );
   }
 

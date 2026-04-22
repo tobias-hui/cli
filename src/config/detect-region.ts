@@ -55,7 +55,7 @@ export async function detectRegion(apiKey: string): Promise<Region> {
       `Warning: API key failed validation against all regions (global, cn).\n` +
       `  This usually means the API key is invalid or the network is blocking requests.\n` +
       `  Falling back to 'global'. Subsequent requests may fail.\n` +
-      `  Run 'mmx auth status' to verify your credentials.\n`,
+      `  Run 'pimx auth status' to verify your credentials.\n`,
     );
     return "global";
   }

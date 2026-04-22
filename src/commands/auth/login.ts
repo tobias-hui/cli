@@ -32,20 +32,34 @@ async function showQuotaAfterLogin(config: Config): Promise<void> {
 
 export default defineCommand({
   name: 'auth login',
-  description: 'Authenticate via OAuth or API key',
-  usage: 'mmx auth login [--method oauth|api-key] [--api-key <key>] [--no-browser]',
+  description: 'Authenticate with MiniMax (OAuth/API key) or PiAPI (API key)',
+  usage: 'pimx auth login [--provider <id>] [--method oauth|api-key] [--api-key <key>] [--no-browser]',
   options: [
-    { flag: '--method <method>', description: 'Auth method: oauth (default), api-key' },
+    { flag: '--provider <id>', description: 'Target provider: minimax (default), piapi' },
+    { flag: '--method <method>', description: 'Auth method: oauth (default, minimax only), api-key' },
     { flag: '--api-key <key>', description: 'API key to store' },
-    { flag: '--no-browser', description: 'Use device-code flow instead of browser' },
+    { flag: '--no-browser', description: 'Use device-code flow instead of browser (minimax only)' },
   ],
   examples: [
-    'mmx auth login',
-    'mmx auth login --no-browser',
-    'mmx auth login --api-key sk-xxxxx',
-    'mmx auth login --method api-key --api-key sk-xxxxx',
+    'pimx auth login',
+    'pimx auth login --no-browser',
+    'pimx auth login --api-key sk-xxxxx',
+    'pimx auth login --provider piapi --api-key xxxxx',
   ],
   async run(config: Config, flags: GlobalFlags) {
+    const providerFlag = (flags.provider as string | undefined);
+    if (providerFlag === 'piapi') {
+      await loginPiapi(config, flags);
+      return;
+    }
+    if (providerFlag && providerFlag !== 'minimax') {
+      throw new CLIError(
+        `Unknown provider: ${providerFlag}`,
+        ExitCode.USAGE,
+        'Allowed: minimax, piapi',
+      );
+    }
+
     const envKey = process.env.MINIMAX_API_KEY;
     if (envKey && !flags.apiKey) {
       const maskedEnvKey = maskToken(envKey);
@@ -72,7 +86,7 @@ export default defineCommand({
         throw new CLIError(
           '--api-key is required when using --method api-key.',
           ExitCode.USAGE,
-          'mmx auth login --api-key sk-xxxxx',
+          'pimx auth login --api-key sk-xxxxx',
         );
       }
 
@@ -128,8 +142,33 @@ export default defineCommand({
 
     await saveCredentials(creds);
     process.stderr.write('Logged in successfully.\n');
-    process.stderr.write('Credentials saved to ~/.mmx/credentials.json\n');
+    process.stderr.write('Credentials saved to ~/.pimx/credentials.json\n');
 
     await showQuotaAfterLogin({ ...config, apiKey: creds.access_token });
   },
 });
+
+async function loginPiapi(config: Config, flags: GlobalFlags): Promise<void> {
+  const key = (flags.apiKey as string) || process.env.PIAPI_API_KEY;
+  if (!key) {
+    throw new CLIError(
+      '--api-key is required with --provider piapi.',
+      ExitCode.USAGE,
+      'pimx auth login --provider piapi --api-key xxxxx',
+    );
+  }
+
+  if (config.dryRun) {
+    console.log('Would save PiAPI key to config.providers.piapi.api_key.');
+    return;
+  }
+
+  const existing = readConfigFile() as Record<string, unknown>;
+  const providers = (existing.providers as Record<string, unknown> | undefined) ?? {};
+  const piapi = (providers.piapi as Record<string, unknown> | undefined) ?? {};
+  piapi.api_key = key;
+  providers.piapi = piapi;
+  existing.providers = providers;
+  await writeConfigFile(existing);
+  process.stderr.write(`PiAPI key saved to ${getConfigPath()}\n`);
+}

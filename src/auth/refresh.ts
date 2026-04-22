@@ -51,7 +51,7 @@ export async function refreshAccessToken(
         throw new CLIError(
           "OAuth session expired and could not be refreshed.",
           ExitCode.AUTH,
-          "Re-authenticate: mmx auth login",
+          "Re-authenticate: pimx auth login",
         );
       }
       lastErr = new Error(`Token refresh failed: HTTP ${res.status}`);
@@ -66,7 +66,7 @@ export async function refreshAccessToken(
   throw new CLIError(
     `Token refresh failed after ${MAX_REFRESH_RETRIES + 1} attempts: ${lastErr?.message}`,
     ExitCode.AUTH,
-    "Check your network connection.\nRe-authenticate: mmx auth login",
+    "Check your network connection.\nRe-authenticate: pimx auth login",
   );
 }
 

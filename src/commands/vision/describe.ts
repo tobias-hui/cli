@@ -55,16 +55,16 @@ async function toDataUri(image: string): Promise<string> {
 export default defineCommand({
   name: 'vision describe',
   description: 'Describe an image using MiniMax VLM',
-  usage: 'mmx vision describe (--image <path-or-url> | --file-id <id>) [--prompt <text>]',
+  usage: 'pimx vision describe (--image <path-or-url> | --file-id <id>) [--prompt <text>]',
   options: [
     { flag: '--image <path-or-url>', description: 'Local image path or URL (base64 encoded automatically)' },
     { flag: '--file-id <id>', description: 'Pre-uploaded file ID (skips base64 conversion)' },
     { flag: '--prompt <text>', description: 'Question about the image (default: "Describe the image.")' },
   ],
   examples: [
-    'mmx vision describe --image photo.jpg',
-    'mmx vision describe --image https://example.com/photo.jpg --prompt "What breed is this dog?"',
-    'mmx vision describe --file-id file-123456789 --prompt "Extract the text"',
+    'pimx vision describe --image photo.jpg',
+    'pimx vision describe --image https://example.com/photo.jpg --prompt "What breed is this dog?"',
+    'pimx vision describe --file-id file-123456789 --prompt "Extract the text"',
   ],
   async run(config: Config, flags: GlobalFlags) {
     let image = (flags.image ?? flags.file ?? flags.path ?? (flags._positional as string[]|undefined)?.[0]) as string | undefined;
@@ -91,7 +91,7 @@ export default defineCommand({
         throw new CLIError(
           'Missing required argument. Must provide either --image or --file-id.',
           ExitCode.USAGE,
-          'mmx vision describe --image <path> OR --file-id <id>',
+          'pimx vision describe --image <path> OR --file-id <id>',
         );
       }
     } else if (image && fileId) {

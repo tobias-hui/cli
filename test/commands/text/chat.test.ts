@@ -66,7 +66,7 @@ describe('text chat command', () => {
     const config: Config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json',
       timeout: 10,
       verbose: false,
@@ -109,7 +109,7 @@ describe('text chat command', () => {
     const config: Config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json',
       timeout: 10,
       defaultTextModel: 'MiniMax-M2.7-highspeed',
@@ -152,7 +152,7 @@ describe('text chat command', () => {
     const config: Config = {
       apiKey: 'test-key',
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'json',
       timeout: 10,
       defaultTextModel: 'MiniMax-M2.7-highspeed',

@@ -12,14 +12,14 @@ import type { FileRetrieveResponse } from '../../types/api';
 export default defineCommand({
   name: 'video download',
   description: 'Download a completed video by file ID',
-  usage: 'mmx video download --file-id <id> --out <path>',
+  usage: 'pimx video download --file-id <id> --out <path>',
   options: [
     { flag: '--file-id <id>', description: 'File ID to download' },
     { flag: '--out <path>', description: 'Output file path' },
   ],
   examples: [
-    'mmx video download --file-id 176844028768320 --out video.mp4',
-    'mmx video download --file-id 176844028768320 --out video.mp4 --quiet',
+    'pimx video download --file-id 176844028768320 --out video.mp4',
+    'pimx video download --file-id 176844028768320 --out video.mp4 --quiet',
   ],
   async run(config: Config, flags: GlobalFlags) {
     const fileId = flags.fileId as string | undefined;
@@ -27,7 +27,7 @@ export default defineCommand({
       throw new CLIError(
         '--file-id is required.',
         ExitCode.USAGE,
-        'mmx video download --file-id <id> --out <path>',
+        'pimx video download --file-id <id> --out <path>',
       );
     }
 
@@ -36,7 +36,7 @@ export default defineCommand({
       throw new CLIError(
         '--out is required.',
         ExitCode.USAGE,
-        'mmx video download --file-id <id> --out video.mp4',
+        'pimx video download --file-id <id> --out video.mp4',
       );
     }
 

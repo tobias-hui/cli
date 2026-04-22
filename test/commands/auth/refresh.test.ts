@@ -9,7 +9,7 @@ describe('auth refresh command', () => {
   it('errors when not using OAuth', async () => {
     const config = {
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'text' as const,
       timeout: 10,
       verbose: false,

@@ -13,7 +13,7 @@ export interface OAuthConfig {
 }
 
 const DEFAULT_OAUTH_CONFIG: OAuthConfig = {
-  clientId: 'mmx-cli',
+  clientId: 'pimx-cli',
   authorizationUrl: 'https://platform.minimax.io/oauth/authorize',
   tokenUrl: 'https://api.minimax.io/v1/oauth/token',
   deviceCodeUrl: 'https://api.minimax.io/v1/oauth/device/code',

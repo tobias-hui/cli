@@ -19,15 +19,15 @@ const KEY_ALIASES: Record<string, string> = {
 export default defineCommand({
   name: 'config set',
   description: 'Set a config value',
-  usage: 'mmx config set --key <key> --value <value>',
+  usage: 'pimx config set --key <key> --value <value>',
   options: [
     { flag: '--key <key>', description: 'Config key (region, base_url, output, timeout, api_key, default_text_model, default_speech_model, default_video_model, default_music_model)' },
     { flag: '--value <value>', description: 'Value to set' },
   ],
   examples: [
-    'mmx config set --key output --value json',
-    'mmx config set --key timeout --value 600',
-    'mmx config set --key base_url --value https://api-uw.minimax.io',
+    'pimx config set --key output --value json',
+    'pimx config set --key timeout --value 600',
+    'pimx config set --key base_url --value https://api-uw.minimax.io',
   ],
   async run(config: Config, flags: GlobalFlags) {
     const positional = flags._positional as string[] | undefined;
@@ -38,7 +38,7 @@ export default defineCommand({
       throw new CLIError(
         '--key and --value are required.',
         ExitCode.USAGE,
-        'mmx config set --key <key> --value <value>',
+        'pimx config set --key <key> --value <value>',
       );
     }
 

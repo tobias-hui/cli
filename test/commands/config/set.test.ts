@@ -15,7 +15,7 @@ describe('config set command', () => {
   it('requires key and value', async () => {
     const config = {
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'text' as const,
       timeout: 10,
       verbose: false,
@@ -44,7 +44,7 @@ describe('config set command', () => {
   it('validates config key', async () => {
     const config = {
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'text' as const,
       timeout: 10,
       verbose: false,
@@ -75,7 +75,7 @@ describe('config set command', () => {
   it('accepts default_text_model key', async () => {
     const config = {
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'text' as const,
       timeout: 10,
       verbose: false,
@@ -107,7 +107,7 @@ describe('config set command', () => {
   it('accepts hyphen alias default-text-model', async () => {
     const config = {
       region: 'global' as const,
-      baseUrl: 'https://api.mmx.io',
+      baseUrl: 'https://api.pimx.io',
       output: 'text' as const,
       timeout: 10,
       verbose: false,

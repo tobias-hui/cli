@@ -1,7 +1,7 @@
 import { homedir } from 'os';
 import { join } from 'path';
 
-const CONFIG_DIR_NAME = '.mmx';
+const CONFIG_DIR_NAME = '.pimx';
 
 export function getConfigDir(): string {
   return join(homedir(), CONFIG_DIR_NAME);

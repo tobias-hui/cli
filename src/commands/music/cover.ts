@@ -15,7 +15,7 @@ export default defineCommand({
   name: 'music cover',
   description: 'Generate a cover version of a song based on reference audio (music-cover / music-cover-free)',
   apiDocs: '/docs/api-reference/music-generation',
-  usage: 'mmx music cover --prompt <text> (--audio <url> | --audio-file <path>) [--lyrics <text>] [--out <path>] [flags]',
+  usage: 'pimx music cover --prompt <text> (--audio <url> | --audio-file <path>) [--lyrics <text>] [--out <path>] [flags]',
   options: [
     { flag: '--model <model>', description: 'Model: music-cover (Token Plan), music-cover-free (Pay-as-you-go, default). Override only if needed.' },
     { flag: '--prompt <text>', description: 'Target cover style, e.g. "Indie folk, acoustic guitar, warm male vocal"' },
@@ -32,9 +32,9 @@ export default defineCommand({
     { flag: '--out <path>', description: 'Save audio to file' },
   ],
   examples: [
-    'mmx music cover --prompt "Indie folk, acoustic guitar, warm male vocal" --audio https://example.com/song.mp3 --out cover.mp3',
-    'mmx music cover --prompt "Jazz, piano, slow" --audio-file original.mp3 --lyrics-file lyrics.txt --out jazz_cover.mp3',
-    'mmx music cover --prompt "Pop, upbeat" --audio https://example.com/ref.mp3 --seed 42 --out reproducible.mp3',
+    'pimx music cover --prompt "Indie folk, acoustic guitar, warm male vocal" --audio https://example.com/song.mp3 --out cover.mp3',
+    'pimx music cover --prompt "Jazz, piano, slow" --audio-file original.mp3 --lyrics-file lyrics.txt --out jazz_cover.mp3',
+    'pimx music cover --prompt "Pop, upbeat" --audio https://example.com/ref.mp3 --seed 42 --out reproducible.mp3',
   ],
   async run(config: Config, flags: GlobalFlags) {
     const prompt = flags.prompt as string | undefined;
@@ -42,14 +42,14 @@ export default defineCommand({
     const audioFile = flags.audioFile as string | undefined;
 
     if (!prompt) {
-      throw new CLIError('--prompt is required.', ExitCode.USAGE, 'mmx music cover --prompt <text> --audio <url>');
+      throw new CLIError('--prompt is required.', ExitCode.USAGE, 'pimx music cover --prompt <text> --audio <url>');
     }
 
     if (!audioUrl && !audioFile) {
       throw new CLIError(
         'One of --audio <url> or --audio-file <path> is required.',
         ExitCode.USAGE,
-        'mmx music cover --prompt <text> --audio <url>',
+        'pimx music cover --prompt <text> --audio <url>',
       );
     }
 
@@ -74,7 +74,7 @@ export default defineCommand({
       throw new CLIError(
         `Invalid model "${model}". Valid models: ${VALID_MODELS.join(', ')}`,
         ExitCode.USAGE,
-        'mmx music cover --model music-cover',
+        'pimx music cover --model music-cover',
       );
     }
     const body: MusicRequest = {

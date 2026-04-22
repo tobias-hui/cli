@@ -215,7 +215,7 @@ describe('handleError: timeout message includes region/auth hint', () => {
       (process as unknown as Record<string, unknown>).exit = origExit;
     }
 
-    expect(captured).toContain('mmx auth status');
+    expect(captured).toContain('pimx auth status');
     expect(captured).toContain('region');
   });
 
@@ -223,12 +223,12 @@ describe('handleError: timeout message includes region/auth hint', () => {
     const err = new CLIError('Request timed out.', ExitCode.TIMEOUT,
       'Try increasing --timeout (e.g. --timeout 60).\n' +
       'If this happens on every request with a valid API key, you may be hitting the wrong region.\n' +
-      'Run: mmx auth status   — to check your credentials and region.\n' +
-      'Run: mmx config set region global   (or cn) — to override the region.',
+      'Run: pimx auth status   — to check your credentials and region.\n' +
+      'Run: pimx config set region global   (or cn) — to override the region.',
     );
 
     expect(err.exitCode).toBe(ExitCode.TIMEOUT);
-    expect(err.hint).toContain('mmx auth status');
-    expect(err.hint).toContain('mmx config set region');
+    expect(err.hint).toContain('pimx auth status');
+    expect(err.hint).toContain('pimx config set region');
   });
 });

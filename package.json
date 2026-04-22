@@ -1,21 +1,21 @@
 {
-  "name": "mmx-cli",
+  "name": "pimx-cli",
   "version": "1.0.11",
-  "description": "CLI for the MiniMax AI Platform",
+  "description": "Multi-provider media generation CLI (MiniMax + PiAPI)",
   "type": "module",
   "engines": {
     "node": ">=18"
   },
   "bin": {
-    "mmx": "dist/mmx.mjs"
+    "pimx": "dist/pimx.mjs"
   },
   "files": [
-    "dist/mmx.mjs"
+    "dist/pimx.mjs"
   ],
   "scripts": {
     "dev": "bun run src/main.ts",
     "build": "bun run build.ts",
-    "build:dev": "bun build src/main.ts --outfile dist/mmx.mjs --target node --minify --define \"process.env.CLI_VERSION='1.0.4'\" && printf '#!/usr/bin/env node\\n' | cat - dist/mmx.mjs > dist/tmp && mv dist/tmp dist/mmx.mjs && chmod +x dist/mmx.mjs",
+    "build:dev": "bun build src/main.ts --outfile dist/pimx.mjs --target node --minify --define \"process.env.CLI_VERSION='1.0.4'\" && printf '#!/usr/bin/env node\\n' | cat - dist/pimx.mjs > dist/tmp && mv dist/tmp dist/pimx.mjs && chmod +x dist/pimx.mjs",
     "prepublishOnly": "bun run build",
     "lint": "eslint src/ test/",
     "typecheck": "tsc --noEmit",

@@ -86,7 +86,7 @@ export default defineCommand({
   name: 'text chat',
   description: 'Send a chat completion (MiniMax Messages API)',
   apiDocs: '/docs/api-reference/text-post',
-  usage: 'mmx text chat --message <text> [flags]',
+  usage: 'pimx text chat --message <text> [flags]',
   options: [
     { flag: '--model <model>', description: 'Model ID (default: MiniMax-M2.7)' },
     { flag: '--message <text>',        description: 'Message text (repeatable, prefix role: to set role)', required: true, type: 'array' },
@@ -99,11 +99,11 @@ export default defineCommand({
     { flag: '--tool <json-or-path>',   description: 'Tool definition as JSON or file path (repeatable)', type: 'array' },
   ],
   examples: [
-    'mmx text chat --message "What is MiniMax?"',
-    'mmx text chat --model MiniMax-M2.7-highspeed --system "You are a coding assistant." --message "Write fizzbuzz in Python"',
-    'mmx text chat --message "Hello" --message "assistant:Hi!" --message "How are you?"',
-    'cat conversation.json | mmx text chat --messages-file - --stream',
-    'mmx text chat --message "Hello" --output json',
+    'pimx text chat --message "What is MiniMax?"',
+    'pimx text chat --model MiniMax-M2.7-highspeed --system "You are a coding assistant." --message "Write fizzbuzz in Python"',
+    'pimx text chat --message "Hello" --message "assistant:Hi!" --message "How are you?"',
+    'cat conversation.json | pimx text chat --messages-file - --stream',
+    'pimx text chat --message "Hello" --output json',
   ],
   async run(config: Config, flags: GlobalFlags) {
     const { system, messages: parsedMessages } = parseMessages(flags);
@@ -120,7 +120,7 @@ export default defineCommand({
         }
         messages = [{ role: 'user', content: hint }];
       } else {
-        failIfMissing('message', 'mmx text chat --message <text>');
+        failIfMissing('message', 'pimx text chat --message <text>');
       }
     }
 
