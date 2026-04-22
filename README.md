@@ -12,7 +12,7 @@
 ## Features
 
 - **Text** — Multi-turn chat, streaming, system prompts, JSON output _(MiniMax)_
-- **Image** — MiniMax `image-01` for fast bulk placeholders + PiAPI `nano-banana-pro` (Gemini 2.5 Flash) for prompt-adherence-heavy work and text-in-image
+- **Image** — MiniMax `image-01` for fast bulk placeholders, PiAPI `nano-banana-pro` (Gemini 2.5 Flash) for prompt-adherence-heavy work and text-in-image, and PiAPI `image remove-bg` for one-click background removal ($0.001/image)
 - **Video** — Async video generation with progress tracking _(MiniMax)_
 - **Speech** — TTS with 30+ voices, speed control, streaming playback _(MiniMax)_
 - **Music** — Text-to-music with lyrics, instrumental mode, auto lyrics, and cover generation _(MiniMax)_
@@ -55,6 +55,7 @@ Requires a [PiAPI](https://piapi.ai) account. Unlocks:
 | Model | Capability | Notes |
 |---|---|---|
 | `nano-banana-pro` | image (t2i + i2i) | 1K/2K $0.105, 4K $0.18 per image |
+| `Qubico/image-toolkit` (`background-remove`) | image background removal | $0.001 per image |
 
 PiAPI tasks are async: submit → poll → download. Default behavior blocks until completion. Pass `--async` to return a `task_id` immediately.
 
@@ -92,10 +93,14 @@ pimx image generate --prompt "A cat" --n 3 --aspect-ratio 16:9
 pimx image generate --prompt "Logo" --out-dir ./out/
 
 # PiAPI nano-banana-pro
-pimx image generate --model nano-banana-pro --prompt "photorealistic sunset" --aspect-ratio 16:9 --resolution 2K --output hero.png
-pimx image generate --model nano-banana-pro --prompt "change background to forest" --image https://example.com/input.png --output out.png
+pimx image generate --model nano-banana-pro --prompt "photorealistic sunset" --aspect-ratio 16:9 --resolution 2K --out hero.png
+pimx image generate --model nano-banana-pro --prompt "change background to forest" --image https://example.com/input.png --out out.png
 pimx image generate --model nano-banana-pro --prompt "art deco poster" --async
 # → {"provider":"piapi","model":"nano-banana-pro","task_id":"...","status":"pending"}
+
+# PiAPI background removal ($0.001/image)
+pimx image remove-bg --image https://example.com/photo.jpg --out clean.png
+pimx image remove-bg --image https://example.com/photo.jpg --rmbg-model BEN2 --out clean.png
 ```
 
 ### `pimx text` · `video` · `speech` · `music` · `vision` · `search` (minimax)

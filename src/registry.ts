@@ -11,6 +11,7 @@ import textChat from './commands/text/chat';
 import speechSynthesize from './commands/speech/synthesize';
 import speechVoices from './commands/speech/voices';
 import imageGenerate from './commands/image/generate';
+import imageRemoveBg from './commands/image/remove-bg';
 import videoGenerate from './commands/video/generate';
 import videoTaskGet from './commands/video/task-get';
 import videoDownload from './commands/video/download';
@@ -190,7 +191,7 @@ ${b('Resources:')}
   ${a('auth')}       ${d('Authentication (login, status, refresh, logout)')}
   ${a('text')}       ${d('Text generation (chat)')}
   ${a('speech')}     ${d('Speech synthesis (synthesize, voices)')}
-  ${a('image')}      ${d('Image generation (generate)')}
+  ${a('image')}      ${d('Image tools (generate, remove-bg)')}
   ${a('video')}      ${d('Video generation (generate, task get, download)')}
   ${a('music')}      ${d('Music generation (generate, cover)')}
   ${a('search')}     ${d('Web search (query)')}
@@ -272,6 +273,7 @@ export const registry = new CommandRegistry({
   'speech generate':   speechSynthesize,
   'speech voices':     speechVoices,
   'image generate':    imageGenerate,
+  'image remove-bg':   imageRemoveBg,
   'video generate':    videoGenerate,
   'video task get':    videoTaskGet,
   'video download':    videoDownload,

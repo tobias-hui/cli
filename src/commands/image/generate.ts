@@ -54,13 +54,13 @@ export default defineCommand({
     { flag: '--async', description: '[piapi] Submit and return task_id without waiting' },
     { flag: '--out-dir <dir>', description: 'Download images to directory' },
     { flag: '--out-prefix <prefix>', description: 'Filename prefix (default: image)' },
-    { flag: '--output <path>', description: 'Single-file download path (piapi, overrides --out-dir)' },
+    { flag: '--out <path>', description: 'Single-file download path (piapi, overrides --out-dir)' },
   ],
   examples: [
     'pimx image generate --prompt "A cat in a spacesuit on Mars" --aspect-ratio 16:9',
     'pimx image generate --prompt "Logo design" --n 3 --out-dir ./generated/',
     '# PiAPI: Nano Banana Pro',
-    'pimx image generate --model nano-banana-pro --prompt "hero banner" --aspect-ratio 16:9 --output hero.png',
+    'pimx image generate --model nano-banana-pro --prompt "hero banner" --aspect-ratio 16:9 --out hero.png',
     '# Image-to-image edit',
     'pimx image generate --model nano-banana-pro --prompt "sunset background" --image https://... --out-dir ./out/',
   ],
@@ -151,7 +151,7 @@ async function runPiapi(config: Config, flags: GlobalFlags, prompt: string, mode
     throw new CLIError('PiAPI task completed but returned no image URLs.', ExitCode.GENERAL);
   }
 
-  const singlePath = flags.output as string | undefined;
+  const singlePath = flags.out as string | undefined;
   const outDir = (flags.outDir as string | undefined) ?? '.';
   const prefix = (flags.outPrefix as string) || 'image';
   const ext = defaultExtension(adapterFlags);

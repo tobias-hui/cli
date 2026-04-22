@@ -12,7 +12,7 @@
 ## 功能特性
 
 - **文本对话** — 多轮对话、流式输出、系统提示词、JSON 格式输出 _(MiniMax)_
-- **图像生成** — MiniMax `image-01` 适合快速批量占位图；PiAPI `nano-banana-pro`（Gemini 2.5 Flash）适合对 prompt 遵循度高、图中含文字的场景
+- **图像生成 / 编辑** — MiniMax `image-01` 适合快速批量占位图；PiAPI `nano-banana-pro`（Gemini 2.5 Flash）适合对 prompt 遵循度高、图中含文字的场景；PiAPI `image remove-bg` 一键去背景（$0.001/张）
 - **视频生成** — 异步生成，进度追踪 _(MiniMax)_
 - **语音合成** — 30+ 音色、语速调节、流式播放 _(MiniMax)_
 - **音乐生成** — 文生音乐、自定义歌词、纯音乐、自动生词、Cover 生成 _(MiniMax)_
@@ -55,6 +55,7 @@ pimx auth login --provider piapi --api-key <key>
 | Model | 能力 | 说明 |
 |---|---|---|
 | `nano-banana-pro` | 图像（t2i + i2i） | 1K/2K $0.105，4K $0.18 / 张 |
+| `Qubico/image-toolkit`（`background-remove`） | 图像去背景 | $0.001 / 张 |
 
 PiAPI 是异步任务：submit → poll → download。默认阻塞直到完成；加 `--async` 立即返回 `task_id`。
 
@@ -92,10 +93,14 @@ pimx image generate --prompt "科技感 Logo" --n 3 --aspect-ratio 16:9
 pimx image generate --prompt "山水画" --out-dir ./output/
 
 # PiAPI nano-banana-pro
-pimx image generate --model nano-banana-pro --prompt "写实黄昏" --aspect-ratio 16:9 --resolution 2K --output hero.png
-pimx image generate --model nano-banana-pro --prompt "换成森林背景" --image https://example.com/input.png --output out.png
+pimx image generate --model nano-banana-pro --prompt "写实黄昏" --aspect-ratio 16:9 --resolution 2K --out hero.png
+pimx image generate --model nano-banana-pro --prompt "换成森林背景" --image https://example.com/input.png --out out.png
 pimx image generate --model nano-banana-pro --prompt "装饰艺术海报" --async
 # → {"provider":"piapi","model":"nano-banana-pro","task_id":"...","status":"pending"}
+
+# PiAPI 去背景（$0.001/张）
+pimx image remove-bg --image https://example.com/photo.jpg --out clean.png
+pimx image remove-bg --image https://example.com/photo.jpg --rmbg-model BEN2 --out clean.png
 ```
 
 ### `pimx text` · `video` · `speech` · `music` · `vision` · `search`（minimax）
