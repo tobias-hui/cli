@@ -1,168 +1,164 @@
-<img src="https://file.cdn.minimax.io/public/MMX.png" alt="MiniMax" width="100%" />
-
 <p align="center">
-  <strong>The official CLI for the MiniMax AI Platform</strong><br>
-  Built for AI agents. Generate text, images, video, speech, and music — from any agent or terminal.
+  <strong>pimx — multi-provider media generation CLI</strong><br>
+  Wraps MiniMax and PiAPI behind one binary. Generate text, images, video, speech, and music from any agent or terminal.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/mmx-cli"><img src="https://img.shields.io/npm/v/mmx-cli.svg" alt="npm version" /></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg" alt="Node.js >= 18" /></a>
+  <a href="README_CN.md">中文文档</a> · <a href="https://platform.minimax.io">MiniMax Global</a> · <a href="https://platform.minimaxi.com">MiniMax CN</a> · <a href="https://piapi.ai">PiAPI</a>
 </p>
 
-<p align="center">
-  <a href="README_CN.md">中文文档</a> · <a href="https://platform.minimax.io">Global Platform</a> · <a href="https://platform.minimaxi.com">CN Platform</a> · <a href="https://platform.minimax.io/docs/token-plan/minimax-cli">Example</a>
-</p>
+> Internal fork of [MiniMax-AI/cli](https://github.com/MiniMax-AI/cli) that adds PiAPI as a second provider. All MiniMax functionality is preserved.
 
 ## Features
 
-- **Text** — Multi-turn chat, streaming, system prompts, JSON output
-- **Image** — Text-to-image with aspect ratio and batch controls
-- **Video** — Async video generation with progress tracking
-- **Speech** — TTS with 30+ voices, speed control, streaming playback
-- **Music** — Text-to-music with lyrics, instrumental mode, auto lyrics, and cover generation from reference audio
-- **Vision** — Image understanding and description
-- **Search** — Web search powered by MiniMax
-- **Dual Region** — Seamless Global (`api.minimax.io`) and CN (`api.minimaxi.com`) support
-
-<img src="https://file.cdn.minimax.io/public/MMX-CLI.png" alt="MiniMax" width="100%" />
+- **Text** — Multi-turn chat, streaming, system prompts, JSON output _(MiniMax)_
+- **Image** — MiniMax `image-01` for fast bulk placeholders + PiAPI `nano-banana-pro` (Gemini 2.5 Flash) for prompt-adherence-heavy work and text-in-image
+- **Video** — Async video generation with progress tracking _(MiniMax)_
+- **Speech** — TTS with 30+ voices, speed control, streaming playback _(MiniMax)_
+- **Music** — Text-to-music with lyrics, instrumental mode, auto lyrics, and cover generation _(MiniMax)_
+- **Vision** — Image understanding and description _(MiniMax)_
+- **Search** — Web search _(MiniMax)_
+- **Multi-provider** — One binary, two key sources: each team member can unlock MiniMax, PiAPI, or both by providing the corresponding key
 
 ## Install
 
 ```bash
-# For AI agents (OpenClaw, Cursor, Claude Code, etc.): add skill to your agent
-npx skills add MiniMax-AI/cli -y -g
-
-# Or install CLI globally for terminal use
-npm install -g mmx-cli
+git clone https://github.com/tobias-hui/cli ~/projects/saas/pi/cli
+cd ~/projects/saas/pi/cli
+bun install && bun run build
+npm link  # exposes `pimx` on PATH
 ```
 
-> Requires [Node.js](https://nodejs.org) 18+
+> Requires [Node.js](https://nodejs.org) 18+ and [bun](https://bun.sh) for development.
 
-> **Requires a MiniMax Token Plan** — [Global](https://platform.minimax.io/subscribe/token-plan) · [CN](https://platform.minimaxi.com/subscribe/token-plan)
+## Providers
+
+Each provider unlocks a set of capabilities. Running `pimx auth status` shows which providers are configured and what models each unlocks.
+
+### MiniMax (text / video / speech / music / vision / search + `image-01`)
+
+```bash
+pimx auth login                     # OAuth browser flow
+pimx auth login --api-key sk-xxxxx  # API key
+```
+
+Requires a [MiniMax Token Plan](https://platform.minimax.io/subscribe/token-plan). Region auto-detected; override with `--region global|cn`.
+
+### PiAPI (Nano Banana Pro — Gemini 2.5 Flash)
+
+```bash
+pimx auth login --provider piapi --api-key <key>
+```
+
+Requires a [PiAPI](https://piapi.ai) account. Unlocks:
+
+| Model | Capability | Notes |
+|---|---|---|
+| `nano-banana-pro` | image (t2i + i2i) | 1K/2K $0.105, 4K $0.18 per image |
+
+PiAPI tasks are async: submit → poll → download. Default behavior blocks until completion. Pass `--async` to return a `task_id` immediately.
 
 ## Quick Start
 
 ```bash
-# Authenticate
-mmx auth login --api-key sk-xxxxx
+# Check what's configured
+pimx auth status --output json
 
-# Start creating
-mmx text chat --message "What is MiniMax?"
-mmx image "A cat in a spacesuit"
-mmx speech synthesize --text "Hello!" --out hello.mp3
-mmx video generate --prompt "Ocean waves at sunset"
-mmx music generate --prompt "Upbeat pop" --lyrics "[verse] La da dee, sunny day"
-mmx search "MiniMax AI latest news"
-mmx vision photo.jpg
-mmx quota
+# MiniMax image (default when no --model)
+pimx image generate --prompt "A cat in a spacesuit" --out-dir ./out/
+
+# PiAPI nano-banana-pro
+pimx image generate --model nano-banana-pro --prompt "hero banner with text 'Launch'" --aspect-ratio 16:9 --output hero.png
+
+# MiniMax video
+pimx video generate --prompt "Ocean waves at sunset" --download sunset.mp4
+
+# MiniMax speech
+pimx speech synthesize --text "Hello!" --out hello.mp3
+
+# MiniMax music
+pimx music generate --prompt "Upbeat pop" --lyrics "[verse] La da dee, sunny day" --out song.mp3
 ```
 
 ## Commands
 
-### `mmx text`
+### `pimx image` (minimax + piapi)
+
+Routes by `--model`, or use `--provider minimax|piapi` to pin explicitly. Without flags, defaults to MiniMax `image-01`.
 
 ```bash
-mmx text chat --message "Write a poem"
-mmx text chat --model MiniMax-M2.7-highspeed --message "Hello" --stream
-mmx text chat --system "You are a coding assistant" --message "Fizzbuzz in Go"
-mmx text chat --message "user:Hi" --message "assistant:Hey!" --message "How are you?"
-cat messages.json | mmx text chat --messages-file - --output json
+# MiniMax
+pimx image generate --prompt "A cat" --n 3 --aspect-ratio 16:9
+pimx image generate --prompt "Logo" --out-dir ./out/
+
+# PiAPI nano-banana-pro
+pimx image generate --model nano-banana-pro --prompt "photorealistic sunset" --aspect-ratio 16:9 --resolution 2K --output hero.png
+pimx image generate --model nano-banana-pro --prompt "change background to forest" --image https://example.com/input.png --output out.png
+pimx image generate --model nano-banana-pro --prompt "art deco poster" --async
+# → {"provider":"piapi","model":"nano-banana-pro","task_id":"...","status":"pending"}
 ```
 
-### `mmx image`
+### `pimx text` · `video` · `speech` · `music` · `vision` · `search` (minimax)
 
 ```bash
-mmx image "A cat in a spacesuit"
-mmx image generate --prompt "A cat" --n 3 --aspect-ratio 16:9
-mmx image generate --prompt "Logo" --out-dir ./out/
+pimx text chat --message "Write a poem"
+pimx video generate --prompt "Ocean waves at sunset" --download sunset.mp4
+pimx video generate --prompt "A robot painting" --async
+pimx speech synthesize --text "Hello!" --out hello.mp3
+pimx speech voices
+pimx music generate --prompt "Cinematic orchestral" --instrumental --out bgm.mp3
+pimx music cover --prompt "Jazz, piano, warm female vocal" --audio-file original.mp3 --out cover.mp3
+pimx vision describe --image https://example.com/img.jpg --prompt "What breed?"
+pimx search query --q "latest news" --output json
 ```
 
-### `mmx video`
+### `pimx auth`
 
 ```bash
-mmx video generate --prompt "Ocean waves at sunset" --download sunset.mp4
-mmx video generate --prompt "A robot painting" --async
-mmx video task get --task-id 123456
-mmx video download --file-id 176844028768320 --out video.mp4
+pimx auth login                                        # MiniMax OAuth
+pimx auth login --api-key sk-xxxxx                     # MiniMax API key
+pimx auth login --provider piapi --api-key <key>       # PiAPI
+pimx auth status                                       # Shows both providers + unlocked models
+pimx auth logout                                       # Clear everything
+pimx auth logout --provider piapi                      # Clear one provider
 ```
 
-### `mmx speech`
+Config lives at `~/.pimx/config.json`:
+
+```json
+{
+  "providers": {
+    "minimax": { "api_key": "sk-...", "region": "global" },
+    "piapi":   { "api_key": "..." }
+  }
+}
+```
+
+Legacy flat `api_key` / `region` at the top level is still recognized for MiniMax (back-compat).
+
+### `pimx config` · `pimx quota`
 
 ```bash
-mmx speech synthesize --text "Hello!" --out hello.mp3
-mmx speech synthesize --text "Stream me" --stream | mpv -
-mmx speech synthesize --text "Hi" --voice English_magnetic_voiced_man --speed 1.2
-echo "Breaking news" | mmx speech synthesize --text-file - --out news.mp3
-mmx speech voices
+pimx quota show
+pimx config show
+pimx config set --key region --value cn
+pimx config set --key default-text-model --value MiniMax-M2.7-highspeed
+pimx config export-schema | jq .
 ```
 
-### `mmx music`
+### Environment variables
 
-```bash
-# Generate with lyrics
-mmx music generate --prompt "Upbeat pop" --lyrics "[verse] La da dee, sunny day" --out song.mp3
-# Auto-generate lyrics from prompt
-mmx music generate --prompt "Indie folk, melancholic, rainy night" --lyrics-optimizer --out song.mp3
-# Instrumental (no vocals)
-mmx music generate --prompt "Cinematic orchestral" --instrumental --out bgm.mp3
-# Cover — generate a cover version from a reference audio file
-mmx music cover --prompt "Jazz, piano, warm female vocal" --audio-file original.mp3 --out cover.mp3
-mmx music cover --prompt "Indie folk" --audio https://example.com/song.mp3 --out cover.mp3
-```
+| Variable | Purpose |
+|---|---|
+| `MINIMAX_API_KEY` | MiniMax API key |
+| `MINIMAX_REGION` | `global` or `cn` |
+| `MINIMAX_BASE_URL` | Override MiniMax base URL |
+| `PIAPI_API_KEY` | PiAPI API key |
+| `PIAPI_BASE_URL` | Override PiAPI base URL |
 
-### `mmx vision`
+## Upstream
 
-```bash
-mmx vision photo.jpg
-mmx vision describe --image https://example.com/img.jpg --prompt "What breed?"
-mmx vision describe --file-id file-123
-```
-
-### `mmx search`
-
-```bash
-mmx search "MiniMax AI"
-mmx search query --q "latest news" --output json
-```
-
-### `mmx auth`
-
-```bash
-mmx auth login --api-key sk-xxxxx
-mmx auth login                    # OAuth browser flow
-mmx auth status
-mmx auth refresh
-mmx auth logout
-```
-
-`mmx auth status` is the canonical way to verify active authentication.
-`~/.mmx/credentials.json` exists only for OAuth login. API-key login persists to
-`~/.mmx/config.json` (and `--api-key` can also be passed per command).
-
-### `mmx config` · `mmx quota`
-
-```bash
-mmx quota
-mmx config show
-mmx config set --key region --value cn
-mmx config set --key default-text-model --value MiniMax-M2.7-highspeed
-mmx config export-schema | jq .
-```
-
-### `mmx update`
-
-```bash
-mmx update
-mmx update latest
-```
-
-## Thanks to
-
-<a href="https://github.com/MiniMax-AI/cli/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=MiniMax-AI/cli" />
-</a>
+Based on [MiniMax-AI/cli](https://github.com/MiniMax-AI/cli). Pull requests to the upstream project would not accept third-party providers, so this is maintained as a fork. To pull new MiniMax features, rebase on upstream `main`.
 
 ## License
 

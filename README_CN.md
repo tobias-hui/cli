@@ -1,168 +1,164 @@
-<img src="https://file.cdn.minimax.io/public/MMX.png" alt="MiniMax" width="100%" />
-
 <p align="center">
-  <strong>MiniMax AI 开放平台官方命令行工具</strong><br>
-  专为 AI Agent 打造。在任意 Agent 或终端中生成文字、图像、视频、语音和音乐。
+  <strong>pimx — 多 Provider 媒体生成 CLI</strong><br>
+  一个 binary 同时接入 MiniMax 和 PiAPI，在任意 Agent 或终端中生成文字、图像、视频、语音和音乐。
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/mmx-cli"><img src="https://img.shields.io/npm/v/mmx-cli.svg" alt="npm version" /></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg" alt="Node.js >= 18" /></a>
+  <a href="README.md">English</a> · <a href="https://platform.minimax.io">MiniMax 国际版</a> · <a href="https://platform.minimaxi.com">MiniMax 国内版</a> · <a href="https://piapi.ai">PiAPI</a>
 </p>
 
-<p align="center">
-  <a href="README.md">English</a> · <a href="https://platform.minimax.io">国际版平台</a> · <a href="https://platform.minimaxi.com">国内版平台</a> · <a href="https://platform.minimaxi.com/docs/token-plan/minimax-cli">例子</a>
-</p>
+> 基于 [MiniMax-AI/cli](https://github.com/MiniMax-AI/cli) 的内部 fork，新增 PiAPI 作为第二个 provider。MiniMax 原生能力完整保留。
 
 ## 功能特性
 
-- **文本对话** — 多轮对话、流式输出、系统提示词、JSON 格式输出
-- **图像生成** — 文生图，支持比例和批量控制
-- **视频生成** — 异步生成，进度追踪
-- **语音合成** — 30+ 音色、语速调节、流式播放
-- **音乐生成** — 文生音乐，支持自定义歌词、纯音乐、自动生词，以及基于参考音频的 Cover 生成
-- **图像理解** — 图片描述与识别
+- **文本对话** — 多轮对话、流式输出、系统提示词、JSON 格式输出 _(MiniMax)_
+- **图像生成** — MiniMax `image-01` 适合快速批量占位图；PiAPI `nano-banana-pro`（Gemini 2.5 Flash）适合对 prompt 遵循度高、图中含文字的场景
+- **视频生成** — 异步生成，进度追踪 _(MiniMax)_
+- **语音合成** — 30+ 音色、语速调节、流式播放 _(MiniMax)_
+- **音乐生成** — 文生音乐、自定义歌词、纯音乐、自动生词、Cover 生成 _(MiniMax)_
+- **图像理解** — 图片描述与识别 _(MiniMax)_
 - **网络搜索** — MiniMax 搜索引擎
-- **双区域** — 国际版（`api.minimax.io`）和国内版（`api.minimaxi.com`）自动切换
-
-<img src="https://file.cdn.minimax.io/public/MMX-CLI.png" alt="MiniMax" width="100%" />
+- **多 Provider** — 一个 binary 两套 key，团队成员配置任一 key 即可解锁对应能力
 
 ## 安装
 
 ```bash
-# AI Agent 使用（OpenClaw、Cursor、Claude Code 等）：添加 Skill 到你的 Agent
-npx skills add MiniMax-AI/cli -y -g
-
-# 或全局安装 CLI 在终端中使用
-npm install -g mmx-cli
+git clone https://github.com/tobias-hui/cli ~/projects/saas/pi/cli
+cd ~/projects/saas/pi/cli
+bun install && bun run build
+npm link  # 暴露 `pimx` 到 PATH
 ```
 
-> 需要 [Node.js](https://nodejs.org) 18+
+> 需要 [Node.js](https://nodejs.org) 18+ 和 [bun](https://bun.sh)（开发时）
 
-> **需要 MiniMax Token 套餐** — [国际版](https://platform.minimax.io/subscribe/token-plan) · [国内版](https://platform.minimaxi.com/subscribe/token-plan)
+## Provider 配置
+
+每个 provider 解锁一组能力。`pimx auth status` 会展示当前配置了哪些 provider、各自解锁了哪些 model。
+
+### MiniMax（text / video / speech / music / vision / search + `image-01`）
+
+```bash
+pimx auth login                     # OAuth 浏览器授权
+pimx auth login --api-key sk-xxxxx  # API Key
+```
+
+需要 [MiniMax Token 套餐](https://platform.minimax.io/subscribe/token-plan)。Region 自动探测，也可用 `--region global|cn` 覆盖。
+
+### PiAPI（Nano Banana Pro — Gemini 2.5 Flash）
+
+```bash
+pimx auth login --provider piapi --api-key <key>
+```
+
+需要 [PiAPI](https://piapi.ai) 账号。解锁的 model：
+
+| Model | 能力 | 说明 |
+|---|---|---|
+| `nano-banana-pro` | 图像（t2i + i2i） | 1K/2K $0.105，4K $0.18 / 张 |
+
+PiAPI 是异步任务：submit → poll → download。默认阻塞直到完成；加 `--async` 立即返回 `task_id`。
 
 ## 快速开始
 
 ```bash
-# 认证
-mmx auth login --api-key sk-xxxxx
+# 查看当前配置
+pimx auth status --output json
 
-# 开始创作
-mmx text chat --message "你好，MiniMax！"
-mmx image "一只穿宇航服的猫"
-mmx speech synthesize --text "你好！" --out hello.mp3
-mmx video generate --prompt "海浪拍打礁石"
-mmx music generate --prompt "欢快的流行乐" --lyrics "[主歌] 啦啦啦，阳光照"
-mmx search "MiniMax AI 最新动态"
-mmx vision photo.jpg
-mmx quota
+# MiniMax 图片（不传 --model 时默认）
+pimx image generate --prompt "一只穿宇航服的猫" --out-dir ./out/
+
+# PiAPI nano-banana-pro
+pimx image generate --model nano-banana-pro --prompt "带'开卖'字样的 hero banner" --aspect-ratio 16:9 --output hero.png
+
+# MiniMax 视频
+pimx video generate --prompt "海浪拍打礁石" --download sunset.mp4
+
+# MiniMax 语音
+pimx speech synthesize --text "你好！" --out hello.mp3
+
+# MiniMax 音乐
+pimx music generate --prompt "欢快的流行乐" --lyrics "[主歌] 啦啦啦，阳光照" --out song.mp3
 ```
 
 ## 命令参考
 
-### `mmx text`
+### `pimx image`（minimax + piapi）
+
+按 `--model` 自动路由，也可用 `--provider minimax|piapi` 显式指定。不传则默认走 MiniMax `image-01`。
 
 ```bash
-mmx text chat --message "写一首诗"
-mmx text chat --model MiniMax-M2.7-highspeed --message "你好" --stream
-mmx text chat --system "你是编程助手" --message "用 Go 写 Fizzbuzz"
-mmx text chat --message "user:你好" --message "assistant:嗨！" --message "你叫什么名字？"
-cat messages.json | mmx text chat --messages-file - --output json
+# MiniMax
+pimx image generate --prompt "科技感 Logo" --n 3 --aspect-ratio 16:9
+pimx image generate --prompt "山水画" --out-dir ./output/
+
+# PiAPI nano-banana-pro
+pimx image generate --model nano-banana-pro --prompt "写实黄昏" --aspect-ratio 16:9 --resolution 2K --output hero.png
+pimx image generate --model nano-banana-pro --prompt "换成森林背景" --image https://example.com/input.png --output out.png
+pimx image generate --model nano-banana-pro --prompt "装饰艺术海报" --async
+# → {"provider":"piapi","model":"nano-banana-pro","task_id":"...","status":"pending"}
 ```
 
-### `mmx image`
+### `pimx text` · `video` · `speech` · `music` · `vision` · `search`（minimax）
 
 ```bash
-mmx image "一只穿宇航服的猫"
-mmx image generate --prompt "科技感 Logo" --n 3 --aspect-ratio 16:9
-mmx image generate --prompt "山水画" --out-dir ./output/
+pimx text chat --message "写一首诗"
+pimx video generate --prompt "海浪拍打礁石" --download sunset.mp4
+pimx video generate --prompt "机器人作画" --async
+pimx speech synthesize --text "你好！" --out hello.mp3
+pimx speech voices
+pimx music generate --prompt "史诗管弦乐" --instrumental --out bgm.mp3
+pimx music cover --prompt "爵士钢琴，慵懒女声" --audio-file original.mp3 --out cover.mp3
+pimx vision describe --image https://example.com/img.jpg --prompt "这是什么品种的狗？"
+pimx search query --q "最新动态" --output json
 ```
 
-### `mmx video`
+### `pimx auth`
 
 ```bash
-mmx video generate --prompt "海浪拍打礁石" --download sunset.mp4
-mmx video generate --prompt "机器人作画" --async
-mmx video task get --task-id 123456
-mmx video download --file-id 176844028768320 --out video.mp4
+pimx auth login                                        # MiniMax OAuth
+pimx auth login --api-key sk-xxxxx                     # MiniMax API Key
+pimx auth login --provider piapi --api-key <key>       # PiAPI
+pimx auth status                                       # 同时展示两个 provider 及解锁的 model
+pimx auth logout                                       # 清理全部
+pimx auth logout --provider piapi                      # 只清单个 provider
 ```
 
-### `mmx speech`
+配置文件位于 `~/.pimx/config.json`：
+
+```json
+{
+  "providers": {
+    "minimax": { "api_key": "sk-...", "region": "global" },
+    "piapi":   { "api_key": "..." }
+  }
+}
+```
+
+顶层扁平的 `api_key` / `region` 仍然识别（MiniMax 向后兼容）。
+
+### `pimx config` · `pimx quota`
 
 ```bash
-mmx speech synthesize --text "你好！" --out hello.mp3
-mmx speech synthesize --text "流式输出" --stream | mpv -
-mmx speech synthesize --text "Hi" --voice English_magnetic_voiced_man --speed 1.2
-echo "头条新闻" | mmx speech synthesize --text-file - --out news.mp3
-mmx speech voices
+pimx quota show
+pimx config show
+pimx config set --key region --value cn
+pimx config set --key default-text-model --value MiniMax-M2.7-highspeed
+pimx config export-schema | jq .
 ```
 
-### `mmx music`
+### 环境变量
 
-```bash
-# 带歌词生成
-mmx music generate --prompt "欢快的流行乐" --lyrics "[主歌] 啦啦啦，阳光照" --out song.mp3
-# 自动生成歌词
-mmx music generate --prompt "忧郁的独立民谣，雨夜" --lyrics-optimizer --out song.mp3
-# 纯音乐（无人声）
-mmx music generate --prompt "史诗管弦乐" --instrumental --out bgm.mp3
-# Cover — 基于参考音频生成翻唱版本
-mmx music cover --prompt "爵士钢琴，慵懒女声" --audio-file original.mp3 --out cover.mp3
-mmx music cover --prompt "民谣吉他" --audio https://example.com/song.mp3 --out cover.mp3
-```
+| 变量 | 说明 |
+|---|---|
+| `MINIMAX_API_KEY` | MiniMax API Key |
+| `MINIMAX_REGION` | `global` 或 `cn` |
+| `MINIMAX_BASE_URL` | 覆盖 MiniMax base URL |
+| `PIAPI_API_KEY` | PiAPI API Key |
+| `PIAPI_BASE_URL` | 覆盖 PiAPI base URL |
 
-### `mmx vision`
+## 上游
 
-```bash
-mmx vision photo.jpg
-mmx vision describe --image https://example.com/img.jpg --prompt "这是什么品种的狗？"
-mmx vision describe --file-id file-123
-```
-
-### `mmx search`
-
-```bash
-mmx search "MiniMax AI"
-mmx search query --q "最新动态" --output json
-```
-
-### `mmx auth`
-
-```bash
-mmx auth login --api-key sk-xxxxx
-mmx auth login                    # OAuth 浏览器授权
-mmx auth status
-mmx auth refresh
-mmx auth logout
-```
-
-请使用 `mmx auth status` 作为认证状态的权威检查方式。`~/.mmx/credentials.json`
-只在 OAuth 登录时存在；API Key 登录会写入 `~/.mmx/config.json`（也可每次通过
-`--api-key` 直接传入）。
-
-### `mmx config` · `mmx quota`
-
-```bash
-mmx quota
-mmx config show
-mmx config set --key region --value cn
-mmx config set --key default-text-model --value MiniMax-M2.7-highspeed
-mmx config export-schema | jq .
-```
-
-### `mmx update`
-
-```bash
-mmx update
-mmx update latest
-```
-
-## 贡献者
-
-<a href="https://github.com/MiniMax-AI/cli/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=MiniMax-AI/cli" />
-</a>
+基于 [MiniMax-AI/cli](https://github.com/MiniMax-AI/cli)。上游不会接受第三方 provider 的 PR，所以以 fork 方式长期维护。跟进上游新功能时在 `main` 上 rebase。
 
 ## 许可证
 
