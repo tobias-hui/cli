@@ -78,10 +78,10 @@ export default defineCommand({
       }
     }
 
-    const method = flags.apiKey ? 'api-key' : (flags.method as string) || 'oauth';
+    const method = (flags.apiKey || envKey) ? 'api-key' : (flags.method as string) || 'oauth';
 
     if (method === 'api-key') {
-      const key = (flags.apiKey as string) || config.apiKey;
+      const key = (flags.apiKey as string) || envKey || config.apiKey;
       if (!key) {
         throw new CLIError(
           '--api-key is required when using --method api-key.',
