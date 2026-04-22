@@ -31,7 +31,13 @@ export const MODELS: ModelEntry[] = [
     provider: 'piapi',
     capability: 'image',
     taskType: 'nano-banana-pro',
-    description: 'Gemini 2.5 Flash image (PiAPI)',
+    description: 'Gemini 2.5 Flash image (PiAPI, task-based)',
+  },
+  {
+    model: 'gpt-image-2-preview',
+    provider: 'piapi',
+    capability: 'image',
+    description: 'OpenAI gpt-image-2 via PiAPI (synchronous, OpenAI-compatible)',
   },
 ];
 

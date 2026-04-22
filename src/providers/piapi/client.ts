@@ -66,6 +66,57 @@ async function piapiFetch<T>(
   return body;
 }
 
+/**
+ * OpenAI-compatible fetch. PiAPI exposes /v1/* endpoints (e.g. /v1/images/generations)
+ * that accept Authorization: Bearer <key> and return raw OpenAI-style payloads
+ * without the PiAPI envelope. Distinct from /api/v1/task which is task-based.
+ */
+export async function openaiFetch<T>(
+  config: Config,
+  path: string,
+  init: { method: string; body?: unknown },
+): Promise<T> {
+  const url = `${getPiapiBaseUrl(config)}${path}`;
+  const version = process.env.CLI_VERSION ?? 'dev';
+  const res = await fetch(url, {
+    method: init.method,
+    headers: {
+      'Authorization': `Bearer ${getPiapiKey(config)}`,
+      'Content-Type': 'application/json',
+      'User-Agent': `pimx-cli/${version}`,
+    },
+    body: init.body ? JSON.stringify(init.body) : undefined,
+    signal: AbortSignal.timeout((config.timeout ?? 300) * 1000),
+  });
+
+  if (config.verbose) {
+    process.stderr.write(`> ${init.method} ${url}\n`);
+    process.stderr.write(`< ${res.status} ${res.statusText}\n`);
+  }
+
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    throw new CLIError(
+      `PiAPI returned non-JSON response (HTTP ${res.status}).`,
+      ExitCode.GENERAL,
+    );
+  }
+
+  if (!res.ok) {
+    const msg = (body as { error?: { message?: string }; message?: string })?.error?.message
+      ?? (body as { message?: string })?.message
+      ?? `HTTP ${res.status}`;
+    throw new CLIError(
+      `PiAPI error: ${msg}`,
+      res.status === 401 ? ExitCode.AUTH : ExitCode.GENERAL,
+    );
+  }
+
+  return body as T;
+}
+
 export async function submitTask<Output = unknown>(
   config: Config,
   req: SubmitTaskBody,

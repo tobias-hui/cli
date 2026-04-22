@@ -17,8 +17,12 @@ import {
   buildNanoBananaTask, extractImageUrls, defaultExtension,
   type NanoBananaFlags,
 } from '../../providers/piapi/nano-banana-pro';
-import { runTask, submitTask } from '../../providers/piapi/client';
+import { runTask, submitTask, openaiFetch } from '../../providers/piapi/client';
 import type { NanoBananaOutput } from '../../providers/piapi/types';
+import {
+  buildGptImage2Request, extractGptImage2Urls, defaultExtensionGptImage2,
+  type GptImage2Flags, type GptImage2Response,
+} from '../../providers/piapi/gpt-image-2';
 
 const MIME_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
@@ -47,11 +51,13 @@ export default defineCommand({
     { flag: '--prompt-optimizer', description: '[minimax] Optimize the prompt before generation.' },
     { flag: '--aigc-watermark', description: '[minimax] Embed AI-generated content watermark.' },
     { flag: '--subject-ref <params>', description: '[minimax] Subject reference: type=character,image=path-or-url' },
-    { flag: '--resolution <level>', description: '[piapi] 1K (default), 2K, 4K' },
-    { flag: '--output-format <fmt>', description: '[piapi] png (default) or jpeg' },
-    { flag: '--image <url>', description: '[piapi] Input image URL for edit (repeatable, max 14)', type: 'array' },
-    { flag: '--safety-level <level>', description: '[piapi] low, medium, high (default high)' },
-    { flag: '--async', description: '[piapi] Submit and return task_id without waiting' },
+    { flag: '--resolution <level>', description: '[piapi nano-banana-pro] 1K (default), 2K, 4K' },
+    { flag: '--output-format <fmt>', description: '[piapi] png (default), jpeg (gpt-image-2: +webp)' },
+    { flag: '--image <url>', description: '[piapi nano-banana-pro] Input image URL for edit (repeatable, max 14)', type: 'array' },
+    { flag: '--safety-level <level>', description: '[piapi nano-banana-pro] low, medium, high (default high)' },
+    { flag: '--size <WxH>', description: '[piapi gpt-image-2] 1024x1024 (default), 1024x1536, 1536x1024, auto' },
+    { flag: '--quality <level>', description: '[piapi gpt-image-2] low (default), medium, high, auto' },
+    { flag: '--async', description: '[piapi nano-banana-pro] Submit and return task_id without waiting' },
     { flag: '--out-dir <dir>', description: 'Download images to directory' },
     { flag: '--out-prefix <prefix>', description: 'Filename prefix (default: image)' },
     { flag: '--out <path>', description: 'Single-file download path (piapi, overrides --out-dir)' },
@@ -61,6 +67,8 @@ export default defineCommand({
     'pimx image generate --prompt "Logo design" --n 3 --out-dir ./generated/',
     '# PiAPI: Nano Banana Pro',
     'pimx image generate --model nano-banana-pro --prompt "hero banner" --aspect-ratio 16:9 --out hero.png',
+    '# PiAPI: gpt-image-2-preview (OpenAI-compatible, synchronous)',
+    'pimx image generate --model gpt-image-2-preview --prompt "a cute sea otter" --size 1024x1024 --quality low --out otter.png',
     '# Image-to-image edit',
     'pimx image generate --model nano-banana-pro --prompt "sunset background" --image https://... --out-dir ./out/',
   ],
@@ -110,11 +118,15 @@ export default defineCommand({
 });
 
 async function runPiapi(config: Config, flags: GlobalFlags, prompt: string, model: string): Promise<void> {
+  if (model === 'gpt-image-2-preview') {
+    await runPiapiGptImage2(config, flags, prompt, model);
+    return;
+  }
   if (model !== 'nano-banana-pro') {
     throw new CLIError(
       `Unsupported PiAPI image model: ${model}`,
       ExitCode.USAGE,
-      'Supported: nano-banana-pro',
+      'Supported: nano-banana-pro, gpt-image-2-preview',
     );
   }
 
@@ -185,6 +197,76 @@ async function runPiapi(config: Config, flags: GlobalFlags, prompt: string, mode
     task_id: task.task_id,
     saved,
     status: task.status,
+  };
+
+  if (format === 'json') {
+    console.log(formatOutput(result, format));
+  } else if (config.quiet) {
+    console.log(saved.join('\n'));
+  } else {
+    console.log(formatOutput(result, format));
+  }
+}
+
+async function runPiapiGptImage2(
+  config: Config, flags: GlobalFlags, prompt: string, model: string,
+): Promise<void> {
+  const adapterFlags: GptImage2Flags = {
+    prompt,
+    n: flags.n as number | undefined,
+    size: flags.size as string | undefined,
+    quality: flags.quality as string | undefined,
+    outputFormat: flags.outputFormat as string | undefined,
+  };
+  const body = buildGptImage2Request(adapterFlags, model);
+  const format = detectOutputFormat(config.output);
+
+  if (config.dryRun) {
+    console.log(formatOutput({ provider: 'piapi', request: body }, format));
+    return;
+  }
+
+  const response = await openaiFetch<GptImage2Response>(
+    config, '/v1/images/generations', { method: 'POST', body },
+  );
+  const imageUrls = extractGptImage2Urls(response);
+  if (imageUrls.length === 0) {
+    throw new CLIError('gpt-image-2 returned no image URLs.', ExitCode.GENERAL);
+  }
+
+  const singlePath = flags.out as string | undefined;
+  const outDir = (flags.outDir as string | undefined) ?? '.';
+  const prefix = (flags.outPrefix as string) || 'image';
+  const ext = defaultExtensionGptImage2(adapterFlags);
+  const saved: string[] = [];
+
+  if (singlePath && imageUrls.length === 1) {
+    await downloadFile(imageUrls[0]!, singlePath, { quiet: config.quiet });
+    saved.push(singlePath);
+  } else {
+    if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
+    for (let i = 0; i < imageUrls.length; i++) {
+      const filename = imageUrls.length === 1
+        ? `${prefix}.${ext}`
+        : `${prefix}_${String(i + 1).padStart(3, '0')}.${ext}`;
+      const destPath = join(outDir, filename);
+      if (existsSync(destPath)) {
+        process.stderr.write(`Warning: overwriting existing file: ${destPath}\n`);
+      }
+      await downloadFile(imageUrls[i]!, destPath, { quiet: config.quiet });
+      saved.push(destPath);
+    }
+  }
+
+  if (!config.quiet) {
+    process.stderr.write(`[Model: ${model} via piapi]\n`);
+  }
+
+  const result = {
+    provider: 'piapi',
+    model,
+    saved,
+    created: response.created,
   };
 
   if (format === 'json') {
